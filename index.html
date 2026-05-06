@@ -1,0 +1,2121 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Li Mi · 米力</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;600&family=Noto+Serif+SC:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #18100a;
+      --bg2:     #221608;
+      --bg3:     #2e1e0e;
+      --amber:   #f0aa28;
+      --rust:    #d05a22;
+      --maple:   #d84e20;
+      --gold:    #ddb848;
+      --cream:   #faf0dc;
+      --warm:    #d8b890;
+      --dim:     #9a7a52;
+      --text:    #f0dfc0;
+      --dark:    #0e0702;
+      --glow-a:  0 0 35px rgba(240,170,40,0.4);
+      --glow-r:  0 0 35px rgba(208,90,34,0.4);
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body {
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Nunito', 'Noto Serif SC', sans-serif;
+      font-weight:300;
+      overflow-x:hidden;
+    }
+    ::-webkit-scrollbar { width:3px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:var(--amber); border-radius:2px; }
+
+    /* FILM GRAIN */
+    body::before {
+      content:'';
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events:none; z-index:9998; opacity:.45;
+    }
+    /* VIGNETTE */
+    body::after {
+      content:'';
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.65) 100%);
+      pointer-events:none; z-index:9997;
+    }
+
+    /* ===== LEAVES CANVAS ===== */
+    #leaf-canvas {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      pointer-events:none; z-index:1;
+    }
+
+    /* ===== NAV ===== */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:200;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.2rem 3.5rem;
+      background:rgba(10,5,0,0.75);
+      backdrop-filter:blur(18px);
+      border-bottom:1px solid rgba(232,160,32,0.1);
+    }
+    .nav-logo {
+      font-family:'Cormorant Garamond', serif;
+      font-size:1.25rem; font-weight:600; letter-spacing:4px;
+      color:var(--amber); text-decoration:none;
+    }
+    .nav-links { display:flex; gap:2.8rem; list-style:none; align-items:center; }
+    .nav-links a {
+      font-family:'Nunito', sans-serif; font-weight:300;
+      font-size:.8rem; letter-spacing:2.5px; text-transform:uppercase;
+      color:var(--dim); text-decoration:none; transition:color .3s;
+      position:relative;
+    }
+    .nav-links a::after {
+      content:''; position:absolute; bottom:-4px; left:0;
+      width:0; height:1px; background:var(--amber); transition:width .3s;
+    }
+    .nav-links a:hover, .nav-links a.active { color:var(--amber); }
+    .nav-links a:hover::after, .nav-links a.active::after { width:100%; }
+    .lang-toggle {
+      display:flex; border:1px solid rgba(232,160,32,.2);
+      border-radius:2px; overflow:hidden;
+    }
+    .lang-btn {
+      padding:.3rem .75rem; font-size:.68rem; font-family:'Nunito',sans-serif;
+      letter-spacing:1px; background:transparent; border:none;
+      color:var(--dim); cursor:pointer; transition:all .25s;
+    }
+    .lang-btn.active { background:var(--amber); color:var(--dark); }
+
+    /* SPINNING VINYL TOP RIGHT */
+    .nav-vinyl {
+      width:36px; height:36px; border-radius:50%;
+      background:
+        radial-gradient(circle at center, #2a1808 0%, #2a1808 18%,
+          #1a0c04 18%, #1a0c04 22%, #2a1808 22%, #2a1808 28%,
+          #1a0c04 28%, #1a0c04 34%, #2a1808 34%);
+      animation:vinylSpin 3s linear infinite;
+      box-shadow:0 0 14px rgba(240,170,40,.25);
+      position:relative; flex-shrink:0;
+      cursor:pointer;
+    }
+    .nav-vinyl::after {
+      content:''; position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      width:10px; height:10px; border-radius:50%;
+      background:radial-gradient(circle, var(--amber), var(--rust));
+      box-shadow:0 0 6px rgba(240,170,40,.5);
+    }
+    @keyframes vinylSpin { to { transform:rotate(360deg); } }
+    .nav-vinyl.paused { animation-play-state:paused; }
+
+    /* ===== SECTIONS ===== */
+    section { position:relative; z-index:2; }
+    .section-label {
+      font-family:'Cormorant Garamond', serif;
+      font-size:.75rem; letter-spacing:5px; color:var(--amber);
+      text-transform:uppercase; margin-bottom:.6rem; font-style:italic;
+    }
+    .section-title {
+      font-family:'Cormorant Garamond', serif; font-weight:600;
+      font-size:clamp(1.8rem,4vw,2.8rem);
+      color:var(--cream); margin-bottom:3rem; line-height:1.2;
+      position:relative;
+    }
+    .section-title::after {
+      content:''; position:absolute; left:0; bottom:-12px;
+      width:45px; height:1px; background:var(--amber);
+    }
+
+    /* ===== HERO ===== */
+    #hero {
+      height:100vh; display:flex; align-items:center;
+      justify-content:flex-start; padding:0 10% 0 8%;
+      position:relative; overflow:hidden;
+    }
+
+    /* HERO BG — matches the warm room lamp tone from the image */
+    .hero-sky {
+      position:absolute; top:0; left:0; right:0; bottom:0;
+      background:
+        radial-gradient(ellipse 60% 70% at 75% 48%, rgba(220,110,30,.28) 0%, rgba(180,70,15,.12) 45%, transparent 70%),
+        radial-gradient(ellipse 35% 45% at 82% 22%, rgba(255,190,60,.12) 0%, transparent 50%),
+        linear-gradient(170deg, #1e1208 0%, #18100a 50%, #0c0806 100%);
+    }
+
+    /* GROUND FOG */
+    .hero-fog {
+      position:absolute; bottom:0; left:0; right:0; height:35%;
+      background:linear-gradient(to top, rgba(232,140,20,.06) 0%, transparent 100%);
+      pointer-events:none;
+    }
+
+    /* HERO IMAGE — full portrait image, bottom-anchored, no cropping */
+    .hero-img {
+      position:absolute; right:0; bottom:0;
+      width:48%; height:auto;
+      display:block;
+      /* GPU layer prevents scroll repaint glitch */
+      transform:translateZ(0);
+      will-change:transform;
+      filter:brightness(.93) saturate(1.06) sepia(.05);
+      -webkit-mask-image:linear-gradient(to right, transparent 0%, rgba(0,0,0,.4) 12%, black 26%);
+      mask-image:linear-gradient(to right, transparent 0%, rgba(0,0,0,.4) 12%, black 26%);
+    }
+
+    /* MUSIC STAFF LINES */
+    .staff-lines {
+      position:absolute; left:0; right:0; bottom:18%;
+      pointer-events:none; opacity:.12;
+    }
+    .staff-lines line { stroke:var(--amber); stroke-width:.5; }
+
+    .hero-content {
+      position:relative; z-index:10;
+      max-width:520px;
+    }
+    .hero-eyebrow {
+      font-family:'Cormorant Garamond',serif; font-style:italic;
+      font-size:1rem; color:var(--amber); letter-spacing:3px;
+      margin-bottom:1.4rem;
+      opacity:0; animation:fadeUp .9s .2s forwards;
+    }
+    .hero-name {
+      font-family:'Cormorant Garamond',serif; font-weight:600;
+      font-size:clamp(3.5rem,8vw,6.5rem);
+      color:var(--cream); letter-spacing:2px; line-height:1;
+      margin-bottom:.4rem;
+      opacity:0; animation:fadeUp .9s .4s forwards;
+    }
+    .hero-name-cn {
+      font-family:'Noto Serif SC',serif; font-weight:300;
+      font-size:clamp(1.1rem,2.5vw,1.8rem);
+      color:var(--dim); letter-spacing:10px;
+      margin-bottom:1.6rem;
+      opacity:0; animation:fadeUp .9s .55s forwards;
+    }
+    .hero-role {
+      font-size:.82rem; letter-spacing:3px; text-transform:uppercase;
+      color:var(--warm); margin-bottom:1.5rem;
+      opacity:0; animation:fadeUp .9s .7s forwards;
+    }
+    .hero-subtitle {
+      font-size:1rem; color:var(--dim); min-height:1.8rem;
+      font-family:'Cormorant Garamond',serif; font-style:italic;
+      line-height:1.8; margin-bottom:1.5rem;
+      opacity:0; animation:fadeUp .9s .85s forwards;
+    }
+    .hero-status {
+      display:inline-flex; align-items:center; gap:.6rem;
+      background:rgba(232,160,32,.08);
+      border:1px solid rgba(232,160,32,.18);
+      border-radius:2rem; padding:.4rem 1.2rem;
+      font-size:.72rem; color:var(--amber);
+      margin-bottom:2.5rem;
+      opacity:0; animation:fadeUp .9s 1s forwards;
+    }
+    .status-dot {
+      width:6px; height:6px; background:var(--amber);
+      border-radius:50%; animation:blink 2s infinite;
+    }
+    @keyframes blink {
+      0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(232,160,32,.5); }
+      50%{ opacity:.6; box-shadow:0 0 0 5px rgba(232,160,32,0); }
+    }
+    .hero-cta {
+      display:flex; gap:1rem;
+      opacity:0; animation:fadeUp .9s 1.15s forwards;
+    }
+    .btn {
+      padding:.75rem 2rem; font-family:'Nunito',sans-serif;
+      font-size:.75rem; letter-spacing:2px; text-transform:uppercase;
+      text-decoration:none; display:inline-block;
+      transition:all .35s; border:none; font-weight:600;
+    }
+    .btn-primary {
+      background:var(--amber); color:var(--dark);
+    }
+    .btn-primary:hover { background:var(--cream); box-shadow:var(--glow-a); }
+    .btn-secondary {
+      background:transparent; color:var(--warm);
+      border:1px solid rgba(200,168,130,.3);
+    }
+    .btn-secondary:hover { border-color:var(--warm); background:rgba(200,168,130,.08); }
+
+    /* SCROLL INDICATOR */
+    .scroll-hint {
+      position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:.5rem;
+      z-index:10; opacity:0; animation:fadeUp .9s 1.5s forwards;
+    }
+    .scroll-hint span { font-size:.6rem; letter-spacing:3px; color:var(--dim); text-transform:uppercase; }
+    .scroll-line {
+      width:1px; height:40px;
+      background:linear-gradient(to bottom, var(--amber), transparent);
+      animation:scrollLine 2s infinite;
+    }
+    @keyframes scrollLine {
+      0%{ transform:scaleY(0); transform-origin:top; }
+      50%{ transform:scaleY(1); transform-origin:top; }
+      51%{ transform:scaleY(1); transform-origin:bottom; }
+      100%{ transform:scaleY(0); transform-origin:bottom; }
+    }
+
+    /* FLOATING MUSIC NOTES */
+    .music-note {
+      position:absolute; font-size:1.2rem; color:var(--amber);
+      animation:floatNote var(--d) var(--dl) infinite ease-in-out;
+      pointer-events:none; opacity:.25; z-index:5;
+    }
+    @keyframes floatNote {
+      0%,100%{ transform:translateY(0) rotate(0deg); opacity:.2; }
+      50%{ transform:translateY(-20px) rotate(10deg); opacity:.4; }
+    }
+
+    /* ===== ABOUT ===== */
+    #about {
+      padding:9rem 3rem; max-width:1100px; margin:0 auto;
+      position:relative;
+    }
+    /* faint warm glow bleeding from hero into about section */
+    #about::before {
+      content:''; position:absolute; top:-80px; right:0;
+      width:500px; height:300px;
+      background:radial-gradient(ellipse at top right, rgba(220,110,30,.08) 0%, transparent 70%);
+      pointer-events:none;
+    }
+    .about-grid { display:grid; grid-template-columns:1.3fr 1fr; gap:6rem; align-items:start; }
+    .about-text p {
+      color:var(--warm); line-height:2.2; margin-bottom:1.2rem;
+      font-size:.92rem;
+    }
+    .about-text p strong { color:var(--amber); font-weight:600; }
+    .about-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem; margin-top:2.5rem; }
+    .stat-card {
+      background:rgba(232,160,32,.05);
+      border:1px solid rgba(232,160,32,.12);
+      padding:1.5rem; text-align:center;
+      transition:all .35s;
+    }
+    .stat-card:hover { border-color:rgba(232,160,32,.35); box-shadow:var(--glow-a); }
+    .stat-number {
+      font-family:'Cormorant Garamond',serif; font-size:2.2rem;
+      color:var(--amber); display:block; font-weight:600;
+    }
+    .stat-label { font-size:.65rem; color:var(--dim); letter-spacing:2px; margin-top:.3rem; display:block; }
+    .about-quote {
+      margin-top:2.5rem; padding:1.5rem 2rem;
+      border-left:2px solid var(--amber);
+      background:rgba(232,160,32,.04);
+      font-family:'Cormorant Garamond',serif; font-style:italic;
+      font-size:1.1rem; color:var(--warm); line-height:1.9;
+    }
+
+    /* ===== SKILLS ===== */
+    #skills {
+      padding:7rem 3rem;
+      background:linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+      position:relative;
+    }
+    #skills::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg, transparent, var(--amber), transparent);
+      opacity:.2;
+    }
+    .skills-inner { max-width:1100px; margin:0 auto; }
+    .skills-grid { display:flex; flex-wrap:wrap; gap:.75rem; margin-top:2.5rem; }
+    .skill-tag {
+      padding:.4rem 1.1rem; font-size:.73rem; letter-spacing:.8px;
+      border-radius:2px; transition:all .3s; font-family:'Nunito',sans-serif;
+    }
+    .skill-tag.ai  { background:rgba(232,160,32,.07); border:1px solid rgba(232,160,32,.2); color:var(--amber); }
+    .skill-tag.ai:hover  { background:rgba(232,160,32,.15); transform:translateY(-2px); box-shadow:var(--glow-a); }
+    .skill-tag.dat { background:rgba(196,80,26,.07); border:1px solid rgba(196,80,26,.2); color:#e07755; }
+    .skill-tag.dat:hover { background:rgba(196,80,26,.15); transform:translateY(-2px); }
+    .skill-tag.tol { background:rgba(200,168,130,.06); border:1px solid rgba(200,168,130,.18); color:var(--warm); }
+    .skill-tag.tol:hover  { background:rgba(200,168,130,.12); transform:translateY(-2px); }
+
+    /* ===== PROJECTS ===== */
+    #projects {
+      padding:9rem 3rem; max-width:1200px; margin:0 auto; position:relative;
+      background:
+        radial-gradient(ellipse 80% 70% at 10% 50%, rgba(180,90,15,.28) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 60% at 90% 15%, rgba(220,145,30,.2) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 80% at 55% 90%, rgba(160,70,10,.18) 0%, transparent 50%),
+        linear-gradient(160deg, #2e1c08 0%, #271608 40%, #1e1206 100%);
+    }
+    #projects::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(232,160,32,.7), rgba(196,90,20,.5), transparent);
+    }
+    .projects-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:1.5rem; margin-top:3rem; }
+    .project-card {
+      background:linear-gradient(145deg, #221608 0%, #1a1006 100%);
+      border:1px solid rgba(232,160,32,.08);
+      padding:2rem; position:relative; transition:all .4s;
+      overflow:hidden;
+    }
+    /* subtle lamp glow in top-right corner of each card */
+    .project-card::before {
+      content:''; position:absolute; top:0; right:0;
+      width:120px; height:120px;
+      background:radial-gradient(circle at top right, rgba(240,160,40,.12) 0%, transparent 70%);
+      transition:opacity .4s; pointer-events:none;
+    }
+    .project-card::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg, transparent, rgba(240,160,40,.35), transparent);
+      transform:scaleX(0); transition:transform .5s;
+    }
+    .project-card:hover::after { transform:scaleX(1); }
+    .project-card:hover {
+      border-color:rgba(240,160,40,.2);
+      transform:translateY(-4px);
+      box-shadow:0 16px 50px rgba(0,0,0,.55),
+                 inset 0 0 60px rgba(220,120,30,.06);
+    }
+    .project-card:hover::before { opacity:2; }
+    .project-num {
+      font-family:'Cormorant Garamond',serif; font-style:italic;
+      font-size:.8rem; color:var(--dim); margin-bottom:1rem;
+    }
+    .project-title {
+      font-family:'Cormorant Garamond',serif; font-weight:600;
+      font-size:1.15rem; color:var(--cream); margin-bottom:.75rem; line-height:1.5;
+    }
+    .project-desc { font-size:.82rem; color:var(--dim); line-height:2; margin-bottom:1.2rem; }
+    .project-tags { display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:1.2rem; }
+    /* project image / visual header */
+    .project-visual {
+      margin:-2rem -2rem 1.5rem -2rem;
+      height:160px; overflow:hidden; position:relative;
+      border-bottom:1px solid rgba(232,160,32,.1);
+    }
+    .project-visual img {
+      width:100%; height:100%; object-fit:cover;
+      filter:brightness(.85) saturate(.9);
+      transition:transform .5s, filter .5s;
+    }
+    .project-card:hover .project-visual img { transform:scale(1.04); filter:brightness(.95) saturate(1.1); }
+    .project-visual svg { width:100%; height:100%; display:block; }
+    .project-visual::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:48px;
+      background:linear-gradient(transparent, #1a1006);
+      pointer-events:none;
+    }
+    .ptag {
+      font-size:.62rem; padding:.2rem .6rem;
+      letter-spacing:.5px; border-radius:2px;
+    }
+    .ptag.ai  { background:rgba(232,160,32,.1); color:var(--amber); }
+    .ptag.dat { background:rgba(196,80,26,.1); color:#e07755; }
+    .ptag.ml  { background:rgba(180,100,200,.1); color:#c090d0; }
+    .ptag.viz { background:rgba(80,160,180,.1); color:#7ac8d8; }
+    .project-link {
+      font-size:.7rem; color:var(--amber); text-decoration:none;
+      letter-spacing:1.5px; display:inline-flex; align-items:center; gap:.4rem;
+      transition:gap .3s;
+    }
+    .project-link:hover { gap:.8rem; }
+
+    /* ===== MUSIC ===== */
+    #music {
+      padding:9rem 3rem;
+      position:relative;
+      background:linear-gradient(180deg, var(--bg) 0%, var(--bg2) 50%, var(--bg) 100%);
+    }
+    #music::before {
+      content:''; position:absolute; top:0; left:0; right:0; height:1px;
+      background:linear-gradient(90deg, transparent, var(--amber), transparent); opacity:.2;
+    }
+    .music-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:6rem; align-items:center; }
+    .music-text .section-title::after { background:var(--rust); }
+    .music-text p { color:var(--warm); line-height:2.2; font-size:.9rem; margin-bottom:1.1rem; }
+    .music-quote {
+      margin-top:2.2rem; padding:1.4rem 1.8rem;
+      border-left:2px solid var(--rust);
+      background:rgba(196,80,26,.05);
+      font-family:'Cormorant Garamond',serif; font-style:italic;
+      font-size:1.05rem; color:var(--warm); line-height:2;
+    }
+    .music-tags { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1.8rem; }
+    .music-tag {
+      font-size:.72rem; padding:.35rem .9rem;
+      border:1px solid rgba(196,80,26,.25);
+      color:var(--rust); background:rgba(196,80,26,.05);
+      border-radius:2rem;
+    }
+
+    /* VINYL / MUSIC VISUAL */
+    .music-visual {
+      display:flex; flex-direction:column; align-items:center; gap:2rem;
+    }
+    .vinyl-wrap {
+      position:relative; width:200px; height:200px;
+    }
+    .vinyl {
+      width:200px; height:200px; border-radius:50%;
+      background:
+        radial-gradient(circle at center, #2a1808 0%, #2a1808 15%, #1a0c04 15%, #1a0c04 20%,
+          #2a1808 20%, #2a1808 25%, #1a0c04 25%, #1a0c04 30%,
+          #2a1808 30%, #2a1808 48%, #2a1808 48%,
+          #3a2010 49%, #3a2010 51%, #2a1808 51%);
+      animation:spin 8s linear infinite;
+      box-shadow:0 0 40px rgba(232,160,32,.2), inset 0 0 40px rgba(0,0,0,.5);
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .vinyl-center {
+      position:absolute; top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      width:55px; height:55px; border-radius:50%;
+      background:radial-gradient(circle, var(--amber) 0%, var(--rust) 100%);
+      display:flex; align-items:center; justify-content:center;
+      font-family:'Cormorant Garamond',serif; font-size:.55rem;
+      color:var(--dark); letter-spacing:1px; text-align:center;
+      font-weight:600; line-height:1.3;
+      box-shadow:0 0 15px rgba(232,160,32,.4);
+    }
+    .vinyl-needle {
+      position:absolute; top:-10px; right:20px;
+      width:3px; height:70px;
+      background:linear-gradient(to bottom, var(--cream), var(--dim));
+      transform-origin:top center;
+      transform:rotate(25deg);
+      border-radius:2px;
+    }
+
+    /* STAFF + NOTES */
+    .staff-visual {
+      width:100%; position:relative; height:80px;
+    }
+    .staff-visual svg { width:100%; height:100%; }
+
+    /* EQ BARS */
+    .eq-row { display:flex; align-items:flex-end; gap:4px; height:60px; }
+    .eq-b {
+      flex:1; border-radius:2px 2px 0 0;
+      background:linear-gradient(to top, var(--rust), rgba(232,160,32,.4));
+      animation:eq var(--d) var(--dl) infinite ease-in-out alternate;
+    }
+    @keyframes eq {
+      from { height:var(--mn); opacity:.5; }
+      to   { height:var(--mx); opacity:1; }
+    }
+
+    /* ===== CONTACT ===== */
+    #contact { padding:9rem 3rem; max-width:680px; margin:0 auto; text-align:center; }
+    #contact .section-title::after { left:50%; transform:translateX(-50%); }
+    .contact-intro { font-size:.92rem; color:var(--dim); line-height:2.2; margin-bottom:3rem; }
+    .contact-links { display:flex; justify-content:center; gap:1.2rem; flex-wrap:wrap; }
+    .contact-link {
+      display:flex; align-items:center; gap:.6rem;
+      padding:.7rem 1.6rem;
+      border:1px solid rgba(232,160,32,.15);
+      color:var(--warm); text-decoration:none; font-size:.76rem;
+      letter-spacing:1px; transition:all .35s; background:var(--bg2);
+    }
+    .contact-link:hover { border-color:var(--amber); color:var(--amber); box-shadow:var(--glow-a); }
+    .contact-link svg { width:15px; height:15px; fill:currentColor; flex-shrink:0; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      text-align:center; padding:2.5rem;
+      border-top:1px solid rgba(232,160,32,.08);
+      font-family:'Cormorant Garamond',serif; font-style:italic;
+      font-size:.82rem; color:var(--dim); letter-spacing:2px;
+    }
+
+    /* ===== EDUCATION TIMELINE ===== */
+    #education { padding:9rem 3rem; max-width:1000px; margin:0 auto; }
+    .timeline {
+      position:relative; margin-top:3.5rem;
+    }
+    /* Center vertical line */
+    .timeline::before {
+      content:''; position:absolute; left:50%; top:0; bottom:0;
+      width:1px; transform:translateX(-50%);
+      background:linear-gradient(to bottom, var(--amber), rgba(240,170,40,.12));
+    }
+    .tl-item {
+      position:relative; width:44%;
+      margin-bottom:3.5rem;
+    }
+    .tl-item:last-child { margin-bottom:0; }
+    /* Left side */
+    .tl-item.left  { margin-left:0; text-align:right; }
+    /* Right side */
+    .tl-item.right { margin-left:56%; text-align:left; }
+
+    /* Dot on center line */
+    .tl-dot {
+      position:absolute; top:8px;
+      width:12px; height:12px; border-radius:50%;
+      background:var(--amber); border:2px solid var(--bg);
+      box-shadow:0 0 12px rgba(240,170,40,.6);
+    }
+    .tl-item.left  .tl-dot { right:-8.5%; transform:translateX(50%); }
+    .tl-item.right .tl-dot { left:-8.5%;  transform:translateX(-50%); }
+
+    /* Connector line from card to dot */
+    .tl-item.left::after {
+      content:''; position:absolute; top:13px; right:-8%;
+      width:8%; height:1px;
+      background:linear-gradient(to right, transparent, rgba(240,170,40,.4));
+    }
+    .tl-item.right::after {
+      content:''; position:absolute; top:13px; left:-8%;
+      width:8%; height:1px;
+      background:linear-gradient(to left, transparent, rgba(240,170,40,.4));
+    }
+
+    .tl-card {
+      background:linear-gradient(145deg, #221608, #1a1006);
+      border:1px solid rgba(240,170,40,.1);
+      padding:1.6rem 1.8rem;
+      transition:border-color .3s, box-shadow .3s;
+    }
+    .tl-card:hover {
+      border-color:rgba(240,170,40,.25);
+      box-shadow:0 12px 40px rgba(0,0,0,.4), 0 0 25px rgba(240,170,40,.08);
+    }
+    .tl-period {
+      font-size:.65rem; letter-spacing:2.5px; color:var(--amber);
+      text-transform:uppercase; margin-bottom:.5rem;
+      font-family:'Nunito',sans-serif;
+    }
+    .tl-school {
+      font-family:'Cormorant Garamond',serif; font-weight:600;
+      font-size:1.15rem; color:var(--cream); margin-bottom:.2rem; line-height:1.3;
+    }
+    .tl-degree {
+      font-size:.82rem; color:var(--warm); margin-bottom:1.2rem;
+      font-style:italic; font-family:'Cormorant Garamond',serif;
+    }
+    /* Progress bars */
+    .tl-bars { display:flex; flex-direction:column; gap:.55rem; }
+    .tl-bar-row { display:flex; align-items:center; gap:.8rem; }
+    .tl-item.left  .tl-bar-row { flex-direction:row-reverse; }
+    .tl-bar-label {
+      font-size:.65rem; color:var(--dim); letter-spacing:.5px;
+      width:110px; flex-shrink:0;
+    }
+    .tl-bar-track {
+      flex:1; height:2px; background:rgba(240,170,40,.1);
+      border-radius:2px; overflow:hidden;
+    }
+    .tl-bar-fill {
+      height:100%; border-radius:2px;
+      background:linear-gradient(90deg, var(--amber), var(--rust));
+      transform:scaleX(0); transform-origin:left;
+    }
+    .tl-item.left .tl-bar-fill { transform-origin:right; }
+    .tl-bar-val {
+      font-size:.62rem; color:var(--amber); width:28px; flex-shrink:0;
+    }
+    .tl-item.left .tl-bar-val { text-align:left; }
+    .tl-item.right .tl-bar-val { text-align:right; }
+    .tl-tags { display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.9rem; }
+    .tl-item.left .tl-tags { justify-content:flex-end; }
+    .tl-tag {
+      font-size:.62rem; padding:.18rem .6rem;
+      border:1px solid rgba(240,170,40,.15);
+      color:var(--dim); border-radius:2rem;
+    }
+    @media(max-width:700px){
+      .timeline::before { left:0; }
+      .tl-item { width:100%; margin-left:0 !important; text-align:left !important; padding-left:1.8rem; }
+      .tl-item.left .tl-dot, .tl-item.right .tl-dot { left:-6px; right:auto; transform:none; }
+      .tl-item::after { display:none; }
+      .tl-item.left .tl-bar-row { flex-direction:row; }
+      .tl-item.left .tl-tags { justify-content:flex-start; }
+    }
+
+    /* ===== REVEAL ===== */
+    @keyframes fadeUp {
+      from{ opacity:0; transform:translateY(24px); }
+      to  { opacity:1; transform:translateY(0); }
+    }
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .8s, transform .8s; }
+    .reveal.on { opacity:1; transform:none; }
+    .reveal:nth-child(2){ transition-delay:.12s; }
+    .reveal:nth-child(3){ transition-delay:.22s; }
+    .reveal:nth-child(4){ transition-delay:.32s; }
+    .reveal:nth-child(5){ transition-delay:.42s; }
+    .reveal:nth-child(6){ transition-delay:.52s; }
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:900px){
+      nav { padding:1rem 1.5rem; }
+      .nav-links { display:none; }
+      .about-grid, .music-inner { grid-template-columns:1fr; gap:2.5rem; }
+      .projects-grid { grid-template-columns:1fr; }
+      #about, #projects, #contact, #skills, #music { padding:5rem 1.5rem; }
+      .hero-illustration { width:75%; opacity:.45; }
+      .hero-content { max-width:100%; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="leaf-canvas"></canvas>
+
+<!-- ===== NAV ===== -->
+<nav>
+  <a href="#hero" class="nav-logo">L · M</a>
+  <ul class="nav-links">
+    <li><a href="#about"     data-en="About"     data-cn="关于">About</a></li>
+    <li><a href="#skills"    data-en="Skills"    data-cn="技能">Skills</a></li>
+    <li><a href="#projects"  data-en="Projects"  data-cn="项目">Projects</a></li>
+    <!-- education nav removed -->
+    <li><a href="#music"     data-en="Music"     data-cn="音乐">Music</a></li>
+    <li><a href="#contact"   data-en="Contact"   data-cn="联系">Contact</a></li>
+    <li>
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+        <button class="lang-btn"        id="btn-zh" onclick="setLang('zh')">中</button>
+      </div>
+    </li>
+  </ul>
+  <!-- Spinning vinyl top right -->
+  <div class="nav-vinyl" id="navVinyl" title="♪"></div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section id="hero">
+  <div class="hero-sky"></div>
+  <div class="hero-fog"></div>
+
+  <!-- floating music notes -->
+  <span class="music-note" style="left:5%;bottom:40%;--d:4s;--dl:0s">♩</span>
+  <span class="music-note" style="left:8%;bottom:55%;--d:5s;--dl:.8s">♪</span>
+  <span class="music-note" style="left:12%;bottom:35%;--d:3.5s;--dl:1.5s">♫</span>
+  <span class="music-note" style="left:3%;bottom:65%;--d:6s;--dl:.3s">♬</span>
+  <span class="music-note" style="right:5%;bottom:50%;--d:4.5s;--dl:.6s">♩</span>
+
+  <!-- HERO IMAGE -->
+  <img src="hero.jpg" class="hero-img" alt="Li Mi lofi illustration">
+  <div style="display:none">
+
+      <!-- WALL -->
+      <rect x="0" y="0" width="520" height="620" fill="url(#wallGrad)"/>
+
+      <!-- LAMP GLOW on wall (warm circle) -->
+      <ellipse cx="375" cy="280" rx="270" ry="250" fill="url(#lampGlow)"/>
+
+      <!-- WALL CRACK (subtle detail) -->
+      <path d="M180 80 Q185 120 182 160 Q180 180 184 200" stroke="#0a0604" stroke-width="1" fill="none" opacity=".4"/>
+      <path d="M190 160 Q196 170 192 185" stroke="#0a0604" stroke-width=".8" fill="none" opacity=".3"/>
+
+      <!-- POSTERS on wall -->
+      <!-- Poster 1 - top left -->
+      <g transform="translate(55,55)">
+        <rect width="95" height="120" rx="2" fill="#1e1208" stroke="#3a2010" stroke-width="1"/>
+        <rect x="4" y="4" width="87" height="112" rx="1" fill="#2a1810"/>
+        <!-- Abstract anime art suggestion -->
+        <ellipse cx="47" cy="45" rx="28" ry="32" fill="#3a2a18" opacity=".8"/>
+        <ellipse cx="40" cy="38" rx="14" ry="18" fill="#c87040" opacity=".6"/>
+        <ellipse cx="55" cy="42" rx="12" ry="16" fill="#204060" opacity=".5"/>
+        <rect x="15" y="85" width="65" height="4" rx="2" fill="#4a3020" opacity=".5"/>
+        <rect x="25" y="94" width="45" height="3" rx="1" fill="#3a2818" opacity=".4"/>
+        <!-- tape -->
+        <rect x="40" y="-3" width="15" height="5" rx="1" fill="#c8a850" opacity=".5"/>
+      </g>
+
+      <!-- Poster 2 - top center-right -->
+      <g transform="translate(235,40)">
+        <rect width="85" height="105" rx="2" fill="#1a1010" stroke="#382018" stroke-width="1"/>
+        <rect x="3" y="3" width="79" height="99" rx="1" fill="#251510"/>
+        <!-- Different colors for variety -->
+        <rect x="8" y="8" width="63" height="50" rx="1" fill="#1a2838" opacity=".7"/>
+        <ellipse cx="42" cy="33" rx="20" ry="22" fill="#c05028" opacity=".5"/>
+        <path d="M15 68 Q42 55 70 65" stroke="#e08030" stroke-width="2" fill="none" opacity=".6"/>
+        <rect x="12" y="78" width="55" height="4" rx="2" fill="#3a2818" opacity=".5"/>
+        <!-- tape -->
+        <rect x="33" y="-3" width="18" height="5" rx="1" fill="#c8a850" opacity=".45"/>
+      </g>
+
+      <!-- Poster 3 - top right (anime text style, like the CITY ONE in image) -->
+      <g transform="translate(345,62)">
+        <rect width="100" height="118" rx="2" fill="#1c1008" stroke="#402010" stroke-width="1"/>
+        <rect x="3" y="3" width="94" height="112" rx="1" fill="#280e06"/>
+        <!-- Stylized scene -->
+        <rect x="6" y="6" width="82" height="55" fill="#1a3040" opacity=".8"/>
+        <path d="M6 61 L25 35 L45 48 L65 30 L88 55 L88 61 Z" fill="#c86020" opacity=".6"/>
+        <!-- Text blocks -->
+        <rect x="8" y="68" width="50" height="7" rx="2" fill="#e09040" opacity=".7"/>
+        <rect x="8" y="80" width="35" height="4" rx="1" fill="#c07030" opacity=".5"/>
+        <rect x="8" y="90" width="60" height="4" rx="1" fill="#a06028" opacity=".4"/>
+        <rect x="8" y="100" width="40" height="3" rx="1" fill="#804020" opacity=".35"/>
+        <!-- tape -->
+        <rect x="38" y="-3" width="22" height="5" rx="1" fill="#c8a850" opacity=".4"/>
+      </g>
+
+      <!-- Small sticky note -->
+      <g transform="translate(330,195)">
+        <rect width="42" height="40" rx="1" fill="#d4b830" opacity=".35"/>
+        <rect x="3" y="8" width="30" height="2" rx="1" fill="#a08018" opacity=".4"/>
+        <rect x="3" y="14" width="24" height="2" rx="1" fill="#a08018" opacity=".35"/>
+        <rect x="3" y="20" width="28" height="2" rx="1" fill="#a08018" opacity=".3"/>
+      </g>
+
+      <!-- FLOOR -->
+      <rect x="0" y="620" width="520" height="120" fill="#120d06"/>
+      <!-- floor line -->
+      <line x1="0" y1="620" x2="520" y2="620" stroke="#2a1808" stroke-width="1.5"/>
+
+      <!-- FLOOR SHADOW (chair) -->
+      <ellipse cx="230" cy="690" rx="160" ry="22" fill="url(#floorShadow)"/>
+
+      <!-- BOOKSHELF / SIDE TABLE (left, blurry background) -->
+      <rect x="10" y="490" width="65" height="130" rx="2" fill="#1a1006" stroke="#2a1808" stroke-width="1" opacity=".8"/>
+      <rect x="12" y="492" width="61" height="8"  rx="1" fill="#2e1e0c" opacity=".6"/>
+      <!-- Books -->
+      <rect x="13" y="502" width="10" height="45" rx="1" fill="#8a3010" opacity=".7"/>
+      <rect x="24" y="508" width="8"  height="39" rx="1" fill="#3a6020" opacity=".6"/>
+      <rect x="33" y="504" width="9"  height="43" rx="1" fill="#c87020" opacity=".65"/>
+      <rect x="43" y="510" width="7"  height="37" rx="1" fill="#204870" opacity=".6"/>
+      <rect x="51" y="506" width="8"  height="41" rx="1" fill="#702030" opacity=".55"/>
+      <rect x="60" y="512" width="7"  height="35" rx="1" fill="#607030" opacity=".5"/>
+      <!-- shelf 2 -->
+      <rect x="12" y="550" width="61" height="5"  rx="1" fill="#2e1e0c" opacity=".6"/>
+      <rect x="13" y="556" width="9"  height="35" rx="1" fill="#4a2860" opacity=".55"/>
+      <rect x="23" y="560" width="8"  height="31" rx="1" fill="#c05020" opacity=".5"/>
+      <rect x="32" y="556" width="10" height="35" rx="1" fill="#1a3850" opacity=".55"/>
+      <rect x="43" y="562" width="7"  height="29" rx="1" fill="#784018" opacity=".5"/>
+      <rect x="51" y="558" width="8"  height="33" rx="1" fill="#306040" opacity=".45"/>
+      <!-- plant on top -->
+      <ellipse cx="38" cy="490" rx="14" ry="6" fill="#1a2808" opacity=".7"/>
+      <path d="M35 490 Q28 470 22 460 Q28 468 35 488" fill="#2a4010" opacity=".6"/>
+      <path d="M38 490 Q38 468 35 455 Q40 468 40 490" fill="#3a5018" opacity=".6"/>
+      <path d="M42 490 Q50 472 54 462 Q48 470 42 490" fill="#2a4010" opacity=".55"/>
+
+      <!-- ARMCHAIR -->
+      <!-- Back cushion -->
+      <path d="M108 420 Q108 350 115 325 Q120 310 140 308 Q185 302 250 302 Q315 302 345 308 Q368 312 372 328 Q378 350 375 420 Z"
+        fill="#8a2a18" stroke="#6a1e10" stroke-width="1.5"/>
+      <!-- Back cushion highlight -->
+      <path d="M130 320 Q185 312 250 312 Q315 312 340 320 Q340 360 335 410 Q290 405 250 405 Q210 405 165 410 Q130 360 130 320 Z"
+        fill="#a03020" opacity=".5"/>
+      <!-- Back cushion shadow -->
+      <path d="M108 380 Q108 420 112 430 L118 432 Q115 410 115 380 Z" fill="#601808" opacity=".4"/>
+      <path d="M375 380 Q375 420 371 432 L365 432 Q369 410 369 380 Z" fill="#601808" opacity=".4"/>
+
+      <!-- Armrest left -->
+      <path d="M88 420 Q86 395 90 375 Q94 355 110 348 Q118 345 125 350 Q128 360 126 420 Z"
+        fill="#7a2415" stroke="#5a180e" stroke-width="1"/>
+      <rect x="82" y="415" width="52" height="18" rx="8" fill="#7a2415" stroke="#5a180e" stroke-width="1"/>
+
+      <!-- Armrest right -->
+      <path d="M395 420 Q397 395 393 375 Q389 355 373 348 Q365 345 358 350 Q355 360 357 420 Z"
+        fill="#7a2415" stroke="#5a180e" stroke-width="1"/>
+      <rect x="349" y="415" width="52" height="18" rx="8" fill="#7a2415" stroke="#5a180e" stroke-width="1"/>
+
+      <!-- Seat cushion -->
+      <path d="M100 430 Q98 500 102 535 Q106 545 140 550 Q190 556 245 556 Q300 556 350 550 Q384 546 387 535 Q391 500 390 430 Q350 438 245 440 Q140 438 100 430 Z"
+        fill="#8a2a18" stroke="#6a1e10" stroke-width="1.5"/>
+      <!-- Seat highlight -->
+      <ellipse cx="245" cy="465" rx="120" ry="22" fill="#a03020" opacity=".35"/>
+
+      <!-- Chair base / legs -->
+      <rect x="125" y="553" width="16" height="60" rx="4" fill="#5a1810" transform="rotate(3 125 553)"/>
+      <rect x="342" y="553" width="16" height="60" rx="4" fill="#5a1810" transform="rotate(-3 342 553)"/>
+      <rect x="130" y="555" width="14" height="55" rx="4" fill="#501408" transform="rotate(2 130 555)" opacity=".6"/>
+      <rect x="340" y="555" width="14" height="55" rx="4" fill="#501408" transform="rotate(-2 340 555)" opacity=".6"/>
+
+      <!-- ===== CHARACTER ===== -->
+      <!-- RIGHT LEG (crossed over left, going up-right) -->
+      <path d="M235 520 Q248 510 265 505 Q288 500 310 506 Q330 512 350 530 Q362 542 370 558 Q376 568 372 578"
+        stroke="#888888" stroke-width="26" fill="none" stroke-linecap="round"/>
+      <!-- right leg lighter (jeans) -->
+      <path d="M235 520 Q248 510 265 505 Q288 500 310 506 Q330 512 350 530 Q362 542 370 558 Q376 568 372 578"
+        stroke="#9a9aaa" stroke-width="22" fill="none" stroke-linecap="round"/>
+
+      <!-- LEFT LEG (extends down to floor, slightly bent) -->
+      <path d="M220 530 Q215 545 210 568 Q206 588 208 615 Q210 635 218 648"
+        stroke="#888888" stroke-width="26" fill="none" stroke-linecap="round"/>
+      <path d="M220 530 Q215 545 210 568 Q206 588 208 615 Q210 635 218 648"
+        stroke="#9a9aaa" stroke-width="22" fill="none" stroke-linecap="round"/>
+
+      <!-- RIGHT SHOE (crossed leg) -->
+      <g transform="translate(355,565) rotate(35)">
+        <rect x="-22" y="-10" width="44" height="22" rx="8" fill="#2a2820"/>
+        <rect x="-20" y="-8"  width="38" height="12" rx="5" fill="#3a3830" opacity=".7"/>
+        <!-- sole -->
+        <rect x="-22" y="8"   width="44" height="8"  rx="4" fill="#1a1818"/>
+        <!-- laces detail -->
+        <rect x="-8" y="-6"   width="20" height="3"  rx="1" fill="#5a5850" opacity=".5"/>
+      </g>
+
+      <!-- LEFT SHOE -->
+      <g transform="translate(218,658) rotate(-10)">
+        <rect x="-18" y="-10" width="40" height="22" rx="8" fill="#2a2820"/>
+        <rect x="-16" y="-8"  width="34" height="12" rx="5" fill="#3a3830" opacity=".7"/>
+        <rect x="-18" y="8"   width="40" height="8"  rx="4" fill="#1a1818"/>
+        <rect x="-5"  y="-6"  width="18" height="3"  rx="1" fill="#5a5850" opacity=".5"/>
+      </g>
+
+      <!-- TORSO (white t-shirt) -->
+      <path d="M185 390 Q178 420 178 455 Q178 490 182 520 Q186 538 200 545 Q220 552 248 553 Q276 554 295 548 Q312 540 316 522 Q320 495 318 460 Q316 425 310 395 Q280 402 248 402 Q216 402 185 390 Z"
+        fill="#e8ddc8"/>
+      <!-- T-shirt shadow/fold -->
+      <path d="M240 408 Q240 450 242 510" stroke="#c8b8a0" stroke-width="2" fill="none" opacity=".5"/>
+      <path d="M205 415 Q210 460 212 510" stroke="#c8b8a0" stroke-width="1.5" fill="none" opacity=".4"/>
+      <path d="M290 412 Q286 458 284 508" stroke="#c8b8a0" stroke-width="1.5" fill="none" opacity=".4"/>
+      <!-- collar -->
+      <path d="M220 395 Q248 405 276 395" stroke="#c8b8a0" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+      <!-- LEFT ARM (resting on armrest) -->
+      <path d="M185 415 Q165 420 148 430 Q135 438 125 445"
+        stroke="#d8a878" stroke-width="20" fill="none" stroke-linecap="round"/>
+      <!-- left hand on armrest -->
+      <ellipse cx="120" cy="447" rx="15" ry="10" fill="#c89a65" transform="rotate(-10 120 447)"/>
+
+      <!-- RIGHT ARM (resting on armrest, holding notebook lightly) -->
+      <path d="M310 415 Q328 420 345 428 Q358 435 368 442"
+        stroke="#d8a878" stroke-width="20" fill="none" stroke-linecap="round"/>
+      <!-- right hand holding pen -->
+      <ellipse cx="373" cy="445" rx="15" ry="10" fill="#c89a65" transform="rotate(10 373 445)"/>
+      <!-- pen in hand -->
+      <line x1="378" y1="438" x2="388" y2="462" stroke="#2a2a2a" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="388" cy="463" r="2.5" fill="#c04010"/>
+
+      <!-- NOTEBOOK on lap -->
+      <g transform="translate(195,455) rotate(-5)">
+        <rect width="100" height="75" rx="3" fill="#e8d8c0" stroke="#c0a880" stroke-width="1"/>
+        <!-- lines -->
+        <line x1="10" y1="18" x2="90" y2="18" stroke="#c0b090" stroke-width=".8" opacity=".6"/>
+        <line x1="10" y1="28" x2="90" y2="28" stroke="#c0b090" stroke-width=".8" opacity=".6"/>
+        <line x1="10" y1="38" x2="90" y2="38" stroke="#c0b090" stroke-width=".8" opacity=".6"/>
+        <line x1="10" y1="48" x2="90" y2="48" stroke="#c0b090" stroke-width=".8" opacity=".6"/>
+        <line x1="10" y1="58" x2="90" y2="58" stroke="#c0b090" stroke-width=".8" opacity=".6"/>
+        <!-- some writing marks -->
+        <line x1="12" y1="18" x2="55" y2="18" stroke="#6a5030" stroke-width="1" opacity=".4"/>
+        <line x1="12" y1="28" x2="70" y2="28" stroke="#6a5030" stroke-width="1" opacity=".35"/>
+        <line x1="12" y1="38" x2="45" y2="38" stroke="#6a5030" stroke-width="1" opacity=".3"/>
+        <!-- spiral bind -->
+        <circle cx="4" cy="15" r="3" fill="none" stroke="#9a8060" stroke-width="1.5"/>
+        <circle cx="4" cy="28" r="3" fill="none" stroke="#9a8060" stroke-width="1.5"/>
+        <circle cx="4" cy="41" r="3" fill="none" stroke="#9a8060" stroke-width="1.5"/>
+        <circle cx="4" cy="54" r="3" fill="none" stroke="#9a8060" stroke-width="1.5"/>
+        <circle cx="4" cy="67" r="3" fill="none" stroke="#9a8060" stroke-width="1.5"/>
+      </g>
+
+      <!-- NECK -->
+      <rect x="234" y="355" width="28" height="40" rx="12" fill="#d09868"/>
+
+      <!-- HEAD -->
+      <ellipse cx="248" cy="330" rx="38" ry="40" fill="#d09868"/>
+
+      <!-- EAR (right, visible) -->
+      <path d="M210 325 Q204 330 204 338 Q205 346 210 348" stroke="#b87848" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <!-- EAR (left side) -->
+      <path d="M286 325 Q292 330 292 338 Q291 346 286 348" stroke="#b87848" stroke-width="5" fill="none" stroke-linecap="round" opacity=".5"/>
+
+      <!-- FACE: closed eyes, peaceful expression -->
+      <!-- Left eye (closed, curved line) -->
+      <path d="M224 325 Q231 318 238 325" stroke="#2a1808" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <!-- Right eye (closed) -->
+      <path d="M256 325 Q263 318 270 325" stroke="#2a1808" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+      <!-- Eyelashes subtle -->
+      <path d="M224 325 Q222 320 223 316" stroke="#2a1808" stroke-width="1.2" fill="none" opacity=".5"/>
+      <path d="M238 325 Q240 319 239 315" stroke="#2a1808" stroke-width="1.2" fill="none" opacity=".5"/>
+      <!-- Nose -->
+      <path d="M244 335 Q242 342 244 345 Q248 347 252 345" stroke="#b87040" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".7"/>
+      <!-- Mouth: slight relaxed smile -->
+      <path d="M236 358 Q248 364 260 358" stroke="#b07040" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <!-- cheek blush (subtle) -->
+      <ellipse cx="222" cy="348" rx="10" ry="6" fill="#e09070" opacity=".18"/>
+      <ellipse cx="274" cy="348" rx="10" ry="6" fill="#e09070" opacity=".18"/>
+
+      <!-- HAIR - spiky, dark brown, manga style -->
+      <!-- Base hair shape -->
+      <path d="M210 295 Q210 270 222 255 Q235 242 248 240 Q262 238 275 248 Q288 258 290 275 Q292 292 288 305"
+        fill="#2a1808"/>
+      <!-- Spiky front bits -->
+      <path d="M216 288 Q208 268 212 250 Q218 240 222 255 Q218 270 218 288 Z" fill="#2a1808"/>
+      <path d="M224 282 Q218 258 226 244 Q232 238 235 252 Q232 265 228 282 Z" fill="#2a1808"/>
+      <path d="M234 278 Q232 252 240 242 Q246 238 248 252 Q246 265 240 278 Z" fill="#342010"/>
+      <path d="M248 276 Q248 250 255 242 Q260 238 262 252 Q258 265 254 278 Z" fill="#2a1808"/>
+      <path d="M262 280 Q265 254 272 248 Q278 244 278 260 Q276 272 268 282 Z" fill="#2a1808"/>
+      <path d="M278 288 Q282 264 284 255 Q288 246 289 262 Q290 278 285 292 Z" fill="#2a1808"/>
+      <!-- Back/side hair -->
+      <path d="M210 295 Q200 310 200 330 Q200 348 205 360"
+        stroke="#2a1808" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <path d="M286 300 Q296 316 296 335 Q295 352 290 364"
+        stroke="#2a1808" stroke-width="12" fill="none" stroke-linecap="round" opacity=".8"/>
+      <!-- hair shine -->
+      <path d="M240 258 Q252 252 265 256" stroke="#5a3818" stroke-width="2.5" fill="none" opacity=".5" stroke-linecap="round"/>
+
+      <!-- HEADPHONES -->
+      <!-- Headband arc -->
+      <path d="M205 318 Q205 268 248 262 Q291 262 291 318"
+        stroke="#2a2a32" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M205 318 Q205 268 248 262 Q291 262 291 318"
+        stroke="#3a3a48" stroke-width="7" fill="none" stroke-linecap="round" opacity=".7"/>
+      <!-- Left cup -->
+      <ellipse cx="204" cy="328" rx="16" ry="19" fill="#2a2a35"/>
+      <ellipse cx="204" cy="328" rx="12" ry="14" fill="#38384a"/>
+      <ellipse cx="204" cy="328" rx="7"  ry="8"  fill="#1a1a25"/>
+      <ellipse cx="204" cy="328" rx="4"  ry="5"  fill="#252535" opacity=".8"/>
+      <!-- Right cup -->
+      <ellipse cx="292" cy="328" rx="16" ry="19" fill="#2a2a35"/>
+      <ellipse cx="292" cy="328" rx="12" ry="14" fill="#38384a"/>
+      <ellipse cx="292" cy="328" rx="7"  ry="8"  fill="#1a1a25"/>
+      <!-- Headphone cord (drapes down) -->
+      <path d="M204 346 Q195 380 198 420 Q200 450 205 460"
+        stroke="#1a1a25" stroke-width="2" fill="none" stroke-linecap="round" opacity=".6"/>
+
+      <!-- ===== FLOOR LAMP ===== -->
+      <!-- Base -->
+      <ellipse cx="432" cy="690" rx="28" ry="8" fill="#1a1510"/>
+      <!-- Pole -->
+      <line x1="432" y1="688" x2="435" y2="320" stroke="#2a2018" stroke-width="5" stroke-linecap="round"/>
+      <line x1="432" y1="688" x2="435" y2="320" stroke="#3a3028" stroke-width="3" stroke-linecap="round"/>
+      <!-- Arm bend -->
+      <path d="M435 320 Q445 310 458 308 Q470 306 478 315"
+        stroke="#2a2018" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M435 320 Q445 310 458 308 Q470 306 478 315"
+        stroke="#3a3028" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <!-- Lamp shade -->
+      <path d="M452 315 Q462 295 490 292 Q505 290 510 305 Q505 322 490 328 Q470 334 455 328 Z"
+        fill="#2a2018" stroke="#1a1810" stroke-width="1"/>
+      <path d="M456 320 Q465 305 488 302 Q500 300 506 312 Q502 325 488 330 Q470 335 458 327 Z"
+        fill="#3a2a18" opacity=".8"/>
+  </div>
+
+  <!-- STAFF LINES -->
+  <svg class="staff-lines" viewBox="0 0 1200 30" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <line x1="0" y1="5"  x2="1200" y2="5"/>
+    <line x1="0" y1="11" x2="1200" y2="11"/>
+    <line x1="0" y1="17" x2="1200" y2="17"/>
+    <line x1="0" y1="23" x2="1200" y2="23"/>
+    <line x1="0" y1="29" x2="1200" y2="29"/>
+  </svg>
+
+  <!-- HERO CONTENT -->
+  <div class="hero-content">
+    <p class="hero-eyebrow" data-en="— portfolio · 2025 —" data-cn="— 作品集 · 2025 —">— portfolio · 2025 —</p>
+    <h1 class="hero-name">Li Mi</h1>
+    <p class="hero-name-cn" data-en="米力" data-cn="米力">米力</p>
+    <p class="hero-role"
+       data-en="AI Engineer  ·  Data Scientist  ·  Folk Guitarist"
+       data-cn="AI工程师  ·  数据科学家  ·  民谣吉他手">AI Engineer  ·  Data Scientist  ·  Folk Guitarist</p>
+    <p class="hero-subtitle" id="typewriter"></p>
+    <div class="hero-status">
+      <span class="status-dot"></span>
+      <span data-en="Open to Work · AI / ML / Data · Arizona, USA"
+            data-cn="正在求职 · AI / 机器学习 / 数据 · 美国亚利桑那州">Open to Work · AI / ML / Data · Arizona, USA</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#projects" class="btn btn-primary"   data-en="View Projects" data-cn="查看项目">View Projects</a>
+      <a href="#contact"  class="btn btn-secondary" data-en="Get in Touch"  data-cn="联系我">Get in Touch</a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <span data-en="scroll" data-cn="滚动">scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section id="about">
+  <div class="reveal">
+    <p class="section-label" data-en="i. About Me" data-cn="i. 关于我">i. About Me</p>
+    <h2 class="section-title" data-en="Who Am I" data-cn="认识我">Who Am I</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p data-en="I'm <strong>Li Mi</strong> (米力), a Data Science graduate student at the University of Arizona, actively transitioning into <strong>AI Engineering</strong>. My foundation is in data analysis and statistical modeling — and I'm now channeling that into building real AI systems: LLM pipelines, RAG architectures, and intelligent agents."
+           data-cn="我是 <strong>米力</strong>（Li Mi），亚利桑那大学数据科学在读研究生，正在向 <strong>AI工程师</strong> 方向转型。我的根基在数据分析与统计建模，现在我将这些能力转化为构建真实的AI系统：大语言模型流水线、RAG架构和智能Agent。">I'm <strong>Li Mi</strong> (米力), a Data Science graduate student at the University of Arizona, actively transitioning into <strong>AI Engineering</strong>. My foundation is in data analysis and statistical modeling — and I'm now channeling that into building real AI systems: LLM pipelines, RAG architectures, and intelligent agents.</p>
+        <p data-en="The turning point was <strong><a href=&quot;https://devpost.com/software/community-food-bank&quot; target=&quot;_blank&quot; style=&quot;color:var(--amber);text-decoration:none;border-bottom:1px solid rgba(232,160,32,.4);&quot;>Hack Arizona</a></strong> — a 36-hour hackathon where my team designed an AI system for community food access. We won the <strong>🏆 Most Innovative Use of AI for the Public Good</strong> award from the <em>Community Food Bank of Southern Arizona</em>. That moment made it clear: I don't just want to analyze the world — I want to build systems that change it."
+           data-cn="转折点是参加 <strong><a href=&quot;https://devpost.com/software/community-food-bank&quot; target=&quot;_blank&quot; style=&quot;color:var(--amber);text-decoration:none;border-bottom:1px solid rgba(232,160,32,.4);&quot;>Hack Arizona</a></strong>——一场36小时黑客马拉松，我们团队为社区食物获取设计了一套AI系统，并荣获 <strong>🏆 最具创新性AI公益奖</strong>（由 Community Food Bank of Southern Arizona 颁发）。那一刻让我明白：我不只是想分析世界，我想构建改变它的系统。">The turning point was <strong><a href="https://devpost.com/software/community-food-bank" target="_blank" style="color:var(--amber);text-decoration:none;border-bottom:1px solid rgba(232,160,32,.4);">Hack Arizona</a></strong> — a 36-hour hackathon where my team designed an AI system for community food access. We won the <strong>🏆 Most Innovative Use of AI for the Public Good</strong> award from the <em>Community Food Bank of Southern Arizona</em>. That moment made it clear: I don't just want to analyze the world — I want to build systems that change it.</p>
+        <p data-en="Outside of code, you'll find me under an autumn tree with a guitar — because both music and AI are about the same thing: finding the patterns that matter."
+           data-cn="代码之外，你会发现我靠在秋天的树下弹着吉他——因为音乐和AI本质上是同一件事：寻找那些真正重要的规律。">Outside of code, you'll find me under an autumn tree with a guitar — because both music and AI are about the same thing: finding the patterns that matter.</p>
+        <div class="about-quote"
+             data-en='"The falling of a maple leaf and the training of a model — both are beautiful acts of letting go."'
+             data-cn='"一片枫叶的飘落与一个模型的训练——都是美丽的放手之道。"'>"The falling of a maple leaf and the training of a model — both are beautiful acts of letting go."</div>
+      </div>
+      <div>
+        <div class="about-stats">
+          <div class="stat-card">
+            <span class="stat-number">6+</span>
+            <span class="stat-label" data-en="Projects" data-cn="个项目">Projects</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">3+</span>
+            <span class="stat-label" data-en="Certifications" data-cn="项认证">Certifications</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-number">♾</span>
+            <span class="stat-label" data-en="Chords" data-cn="个和弦">Chords</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SKILLS ===== -->
+<section id="skills">
+  <div class="skills-inner">
+    <div class="reveal">
+      <p class="section-label" data-en="ii. Skills" data-cn="ii. 技能">ii. Skills</p>
+      <h2 class="section-title" data-en="Technical Arsenal" data-cn="技术武器库">Technical Arsenal</h2>
+      <div class="skills-grid">
+        <span class="skill-tag ai">Python</span>
+        <span class="skill-tag ai">LLM / Prompt Engineering</span>
+        <span class="skill-tag ai">Machine Learning</span>
+        <span class="skill-tag ai">NLP / Transformers</span>
+        <span class="skill-tag ai">RAG Architecture</span>
+        <span class="skill-tag ai">Gemini API</span>
+        <span class="skill-tag dat">Pandas / NumPy</span>
+        <span class="skill-tag dat">Scikit-learn</span>
+        <span class="skill-tag dat">PyTorch / BERT</span>
+        <span class="skill-tag dat">SQL / MySQL</span>
+        <span class="skill-tag dat">PySpark</span>
+        <span class="skill-tag dat">Snowflake</span>
+        <span class="skill-tag tol">Tableau / Power BI</span>
+        <span class="skill-tag tol">R / ggplot2</span>
+        <span class="skill-tag tol">AWS / Azure</span>
+        <span class="skill-tag tol">Git</span>
+        <span class="skill-tag tol">Statistical Modeling</span>
+        <span class="skill-tag tol">Data Visualization</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROJECTS ===== -->
+<section id="projects">
+  <div class="reveal">
+    <p class="section-label" data-en="iii. Projects" data-cn="iii. 项目">iii. Projects</p>
+    <h2 class="section-title" data-en="Featured Work" data-cn="精选项目">Featured Work</h2>
+  </div>
+  <div class="projects-grid">
+
+    <div class="project-card reveal" style="border-color:rgba(232,160,32,.45);position:relative;overflow:hidden;">
+      <div class="project-visual">
+        <img src="https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/004/619/505/datas/original.png" alt="Community Food Bank AI Platform screenshot" loading="lazy">
+      </div>
+      <div style="position:absolute;top:0;left:0;right:0;background:linear-gradient(90deg,rgba(20,10,2,.82),rgba(20,10,2,.4));padding:.35rem .9rem;font-size:.68rem;font-weight:700;letter-spacing:.08em;color:var(--amber);border-bottom:1px solid rgba(232,160,32,.25);">🏆 HACK ARIZONA 2026 — AWARD WINNER</div>
+      <p class="project-num" data-en="Project 01" data-cn="项目 01">Project 01</p>
+      <h3 class="project-title" data-en="Community Food Bank AI Platform" data-cn="社区食物银行 AI 平台">Community Food Bank AI Platform</h3>
+      <p class="project-desc"
+         data-en="Full-stack dropout risk prediction platform for culinary training programs. Real-time logistic regression model scores participants across 7 behavioral signals weekly; coordinators see a live intervention dashboard sorted by risk probability."
+         data-cn="为烹饪培训项目构建的全栈辍学风险预测平台。逻辑回归模型每周对7项行为信号打分，协调员通过实时干预仪表板按风险概率排序查看预警。">Full-stack dropout risk prediction platform for culinary training programs. Real-time logistic regression model scores participants across 7 behavioral signals weekly; coordinators see a live intervention dashboard sorted by risk probability.</p>
+      <p style="font-size:.72rem;color:var(--amber);margin-bottom:.8rem;font-style:italic;">🏆 Most Innovative Use of AI for the Public Good · Community Food Bank of Southern Arizona</p>
+      <div class="project-tags">
+        <span class="ptag ai">LLM</span><span class="ptag ml">Logistic Regression</span>
+        <span class="ptag dat">MongoDB</span><span class="ptag dat">Node.js</span><span class="ptag dat">Python</span>
+      </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+        <a href="https://github.com/LiMi686/Hack_Arizona" class="project-link" target="_blank"
+           data-en="GitHub →" data-cn="源码 →">GitHub →</a>
+        <a href="https://devpost.com/software/community-food-bank" class="project-link" target="_blank"
+           data-en="Devpost →" data-cn="Devpost →">Devpost →</a>
+      </div>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-visual">
+        <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect width="400" height="160" fill="#0e0a04"/>
+          <!-- grid lines -->
+          <line x1="0" y1="40" x2="400" y2="40" stroke="rgba(232,160,32,.06)" stroke-width="1"/>
+          <line x1="0" y1="80" x2="400" y2="80" stroke="rgba(232,160,32,.06)" stroke-width="1"/>
+          <line x1="0" y1="120" x2="400" y2="120" stroke="rgba(232,160,32,.06)" stroke-width="1"/>
+          <!-- document nodes -->
+          <rect x="30" y="22" width="52" height="36" rx="3" fill="rgba(232,160,32,.08)" stroke="rgba(232,160,32,.3)" stroke-width="1"/>
+          <line x1="38" y1="32" x2="74" y2="32" stroke="rgba(232,160,32,.5)" stroke-width="1.5"/>
+          <line x1="38" y1="39" x2="66" y2="39" stroke="rgba(232,160,32,.3)" stroke-width="1"/>
+          <line x1="38" y1="46" x2="70" y2="46" stroke="rgba(232,160,32,.3)" stroke-width="1"/>
+          <rect x="30" y="76" width="52" height="36" rx="3" fill="rgba(232,160,32,.08)" stroke="rgba(232,160,32,.25)" stroke-width="1"/>
+          <line x1="38" y1="86" x2="74" y2="86" stroke="rgba(232,160,32,.4)" stroke-width="1.5"/>
+          <line x1="38" y1="93" x2="62" y2="93" stroke="rgba(232,160,32,.25)" stroke-width="1"/>
+          <line x1="38" y1="100" x2="70" y2="100" stroke="rgba(232,160,32,.25)" stroke-width="1"/>
+          <rect x="30" y="110" width="52" height="36" rx="3" fill="rgba(196,80,26,.08)" stroke="rgba(196,80,26,.25)" stroke-width="1"/>
+          <line x1="38" y1="120" x2="74" y2="120" stroke="rgba(196,80,26,.4)" stroke-width="1.5"/>
+          <line x1="38" y1="127" x2="66" y2="127" stroke="rgba(196,80,26,.25)" stroke-width="1"/>
+          <!-- connection lines to center -->
+          <line x1="82" y1="40" x2="190" y2="80" stroke="rgba(232,160,32,.2)" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="82" y1="94" x2="190" y2="80" stroke="rgba(232,160,32,.15)" stroke-width="1" stroke-dasharray="4 3"/>
+          <line x1="82" y1="128" x2="190" y2="80" stroke="rgba(196,80,26,.15)" stroke-width="1" stroke-dasharray="4 3"/>
+          <!-- central vector store circle -->
+          <circle cx="190" cy="80" r="28" fill="rgba(232,160,32,.07)" stroke="rgba(232,160,32,.4)" stroke-width="1.5"/>
+          <circle cx="190" cy="80" r="18" fill="rgba(232,160,32,.06)" stroke="rgba(232,160,32,.25)" stroke-width="1"/>
+          <text x="190" y="76" text-anchor="middle" fill="rgba(232,160,32,.8)" font-size="8" font-family="monospace">Vector</text>
+          <text x="190" y="87" text-anchor="middle" fill="rgba(232,160,32,.6)" font-size="8" font-family="monospace">Store</text>
+          <!-- line to LLM -->
+          <line x1="218" y1="80" x2="295" y2="80" stroke="rgba(232,160,32,.3)" stroke-width="1.5" stroke-dasharray="5 3"/>
+          <!-- LLM box -->
+          <rect x="295" y="58" width="72" height="44" rx="4" fill="rgba(232,160,32,.1)" stroke="rgba(232,160,32,.45)" stroke-width="1.5"/>
+          <text x="331" y="76" text-anchor="middle" fill="rgba(232,160,32,.9)" font-size="9" font-family="monospace" font-weight="bold">LLM</text>
+          <text x="331" y="91" text-anchor="middle" fill="rgba(232,160,32,.5)" font-size="7" font-family="monospace">Response</text>
+          <!-- query arrow -->
+          <text x="148" y="52" text-anchor="middle" fill="rgba(232,160,32,.4)" font-size="7" font-family="monospace">query</text>
+          <circle cx="190" cy="80" r="4" fill="rgba(232,160,32,.9)"/>
+        </svg>
+      </div>
+      <p class="project-num" data-en="Project 02" data-cn="项目 02">Project 02</p>
+      <h3 class="project-title" data-en="RAG Financial Chatbot" data-cn="金融文档 RAG 聊天机器人">RAG Financial Chatbot</h3>
+      <p class="project-desc"
+         data-en="Retrieval-Augmented Generation chatbot for intelligent financial document Q&A with vector database integration."
+         data-cn="基于检索增强生成技术的金融文档智能问答系统，集成向量数据库，实现精准语义检索。">Retrieval-Augmented Generation chatbot for intelligent financial document Q&A with vector database integration.</p>
+      <div class="project-tags">
+        <span class="ptag ai">RAG</span><span class="ptag ml">Vector DB</span>
+        <span class="ptag dat">Python</span><span class="ptag ai">LLM</span>
+      </div>
+      <a href="https://github.com/LiMi686/data-portfolio" class="project-link" target="_blank"
+         data-en="View on GitHub →" data-cn="查看源码 →">View on GitHub →</a>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-visual">
+        <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect width="400" height="160" fill="#0c0906"/>
+          <!-- attention matrix heatmap background -->
+          <rect x="20" y="15" width="170" height="130" rx="2" fill="rgba(0,0,0,.3)"/>
+          <!-- heatmap cells 7x7 -->
+          <g opacity=".9">
+            <!-- row 0 -->
+            <rect x="22" y="17" width="22" height="17" fill="rgba(232,160,32,.75)"/><rect x="46" y="17" width="22" height="17" fill="rgba(232,160,32,.2)"/><rect x="70" y="17" width="22" height="17" fill="rgba(232,160,32,.1)"/><rect x="94" y="17" width="22" height="17" fill="rgba(232,160,32,.35)"/><rect x="118" y="17" width="22" height="17" fill="rgba(232,160,32,.1)"/><rect x="142" y="17" width="22" height="17" fill="rgba(232,160,32,.05)"/><rect x="166" y="17" width="22" height="17" fill="rgba(232,160,32,.15)"/>
+            <!-- row 1 -->
+            <rect x="22" y="36" width="22" height="17" fill="rgba(232,160,32,.15)"/><rect x="46" y="36" width="22" height="17" fill="rgba(232,160,32,.8)"/><rect x="70" y="36" width="22" height="17" fill="rgba(232,160,32,.4)"/><rect x="94" y="36" width="22" height="17" fill="rgba(232,160,32,.1)"/><rect x="118" y="36" width="22" height="17" fill="rgba(232,160,32,.25)"/><rect x="142" y="36" width="22" height="17" fill="rgba(196,80,26,.35)"/><rect x="166" y="36" width="22" height="17" fill="rgba(232,160,32,.05)"/>
+            <!-- row 2 -->
+            <rect x="22" y="55" width="22" height="17" fill="rgba(232,160,32,.05)"/><rect x="46" y="55" width="22" height="17" fill="rgba(232,160,32,.3)"/><rect x="70" y="55" width="22" height="17" fill="rgba(232,160,32,.9)"/><rect x="94" y="55" width="22" height="17" fill="rgba(232,160,32,.2)"/><rect x="118" y="55" width="22" height="17" fill="rgba(196,80,26,.5)"/><rect x="142" y="55" width="22" height="17" fill="rgba(232,160,32,.1)"/><rect x="166" y="55" width="22" height="17" fill="rgba(232,160,32,.2)"/>
+            <!-- row 3 -->
+            <rect x="22" y="74" width="22" height="17" fill="rgba(232,160,32,.2)"/><rect x="46" y="74" width="22" height="17" fill="rgba(232,160,32,.1)"/><rect x="70" y="74" width="22" height="17" fill="rgba(232,160,32,.35)"/><rect x="94" y="74" width="22" height="17" fill="rgba(232,160,32,.85)"/><rect x="118" y="74" width="22" height="17" fill="rgba(232,160,32,.15)"/><rect x="142" y="74" width="22" height="17" fill="rgba(180,100,200,.55)"/><rect x="166" y="74" width="22" height="17" fill="rgba(232,160,32,.1)"/>
+            <!-- row 4 -->
+            <rect x="22" y="93" width="22" height="17" fill="rgba(232,160,32,.1)"/><rect x="46" y="93" width="22" height="17" fill="rgba(196,80,26,.4)"/><rect x="70" y="93" width="22" height="17" fill="rgba(232,160,32,.2)"/><rect x="94" y="93" width="22" height="17" fill="rgba(232,160,32,.15)"/><rect x="118" y="93" width="22" height="17" fill="rgba(232,160,32,.9)"/><rect x="142" y="93" width="22" height="17" fill="rgba(232,160,32,.3)"/><rect x="166" y="93" width="22" height="17" fill="rgba(232,160,32,.1)"/>
+            <!-- row 5 -->
+            <rect x="22" y="112" width="22" height="17" fill="rgba(232,160,32,.05)"/><rect x="46" y="112" width="22" height="17" fill="rgba(232,160,32,.35)"/><rect x="70" y="112" width="22" height="17" fill="rgba(196,80,26,.45)"/><rect x="94" y="112" width="22" height="17" fill="rgba(180,100,200,.4)"/><rect x="118" y="112" width="22" height="17" fill="rgba(232,160,32,.2)"/><rect x="142" y="112" width="22" height="17" fill="rgba(232,160,32,.8)"/><rect x="166" y="112" width="22" height="17" fill="rgba(232,160,32,.25)"/>
+            <!-- row 6 -->
+            <rect x="22" y="131" width="22" height="17" fill="rgba(232,160,32,.15)"/><rect x="46" y="131" width="22" height="17" fill="rgba(232,160,32,.1)"/><rect x="70" y="131" width="22" height="17" fill="rgba(232,160,32,.2)"/><rect x="94" y="131" width="22" height="17" fill="rgba(232,160,32,.4)"/><rect x="118" y="131" width="22" height="17" fill="rgba(232,160,32,.1)"/><rect x="142" y="131" width="22" height="17" fill="rgba(232,160,32,.25)"/><rect x="166" y="131" width="22" height="17" fill="rgba(232,160,32,.85)"/>
+          </g>
+          <!-- token labels right side -->
+          <text x="212" y="29" fill="rgba(232,160,32,.9)" font-size="9" font-family="monospace">[CLS]</text>
+          <text x="212" y="48" fill="rgba(232,160,32,.7)" font-size="9" font-family="monospace">The</text>
+          <text x="212" y="67" fill="rgba(196,80,26,.9)" font-size="9" font-family="monospace">model</text>
+          <text x="212" y="86" fill="rgba(180,100,200,.9)" font-size="9" font-family="monospace">learns</text>
+          <text x="212" y="105" fill="rgba(232,160,32,.7)" font-size="9" font-family="monospace">to</text>
+          <text x="212" y="124" fill="rgba(232,160,32,.9)" font-size="9" font-family="monospace">classify</text>
+          <text x="212" y="143" fill="rgba(232,160,32,.6)" font-size="9" font-family="monospace">[SEP]</text>
+          <!-- title -->
+          <text x="310" y="60" text-anchor="middle" fill="rgba(232,160,32,.5)" font-size="9" font-family="monospace">Attention</text>
+          <text x="310" y="73" text-anchor="middle" fill="rgba(232,160,32,.9)" font-size="11" font-family="monospace" font-weight="bold">BERT</text>
+          <text x="310" y="86" text-anchor="middle" fill="rgba(196,80,26,.7)" font-size="9" font-family="monospace">DistilRoBERTa</text>
+          <!-- accuracy badge -->
+          <rect x="267" y="100" width="88" height="28" rx="3" fill="rgba(232,160,32,.08)" stroke="rgba(232,160,32,.3)" stroke-width="1"/>
+          <text x="311" y="112" text-anchor="middle" fill="rgba(232,160,32,.5)" font-size="7" font-family="monospace">fine-tuned</text>
+          <text x="311" y="123" text-anchor="middle" fill="rgba(232,160,32,.8)" font-size="8" font-family="monospace">NLP · PyTorch</text>
+        </svg>
+      </div>
+      <p class="project-num" data-en="Project 03" data-cn="项目 03">Project 03</p>
+      <h3 class="project-title" data-en="BERT Fine-tuning for NLP" data-cn="BERT 微调自然语言处理">BERT Fine-tuning for NLP</h3>
+      <p class="project-desc"
+         data-en="Fine-tuned BERT and DistilRoBERTa for commonsense validation and multi-label text classification tasks."
+         data-cn="微调 BERT 与 DistilRoBERTa 模型，用于常识性验证与多标签文本分类，实现高精度语义理解。">Fine-tuned BERT and DistilRoBERTa for commonsense validation and multi-label text classification tasks.</p>
+      <div class="project-tags">
+        <span class="ptag ml">BERT</span><span class="ptag ml">PyTorch</span>
+        <span class="ptag ai">NLP</span><span class="ptag ml">DistilRoBERTa</span>
+      </div>
+      <a href="https://github.com/LiMi686/data-portfolio" class="project-link" target="_blank"
+         data-en="View on GitHub →" data-cn="查看源码 →">View on GitHub →</a>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-visual">
+        <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect width="400" height="160" fill="#0c0806"/>
+          <!-- baseline -->
+          <line x1="30" y1="130" x2="260" y2="130" stroke="rgba(232,160,32,.2)" stroke-width="1"/>
+          <!-- bars -->
+          <rect x="40"  y="60"  width="22" height="70" rx="2" fill="rgba(232,160,32,.7)"/>
+          <rect x="70"  y="45"  width="22" height="85" rx="2" fill="rgba(232,160,32,.85)"/>
+          <rect x="100" y="80"  width="22" height="50" rx="2" fill="rgba(196,80,26,.7)"/>
+          <rect x="130" y="38"  width="22" height="92" rx="2" fill="rgba(232,160,32,.95)"/>
+          <rect x="160" y="65"  width="22" height="65" rx="2" fill="rgba(196,80,26,.55)"/>
+          <rect x="190" y="90"  width="22" height="40" rx="2" fill="rgba(232,160,32,.5)"/>
+          <rect x="220" y="52"  width="22" height="78" rx="2" fill="rgba(232,160,32,.8)"/>
+          <!-- x-axis labels -->
+          <text x="51"  y="143" text-anchor="middle" fill="rgba(232,160,32,.4)" font-size="7" font-family="monospace">Q1</text>
+          <text x="81"  y="143" text-anchor="middle" fill="rgba(232,160,32,.4)" font-size="7" font-family="monospace">Q2</text>
+          <text x="111" y="143" text-anchor="middle" fill="rgba(196,80,26,.4)"  font-size="7" font-family="monospace">Q3</text>
+          <text x="141" y="143" text-anchor="middle" fill="rgba(232,160,32,.4)" font-size="7" font-family="monospace">Q4</text>
+          <text x="171" y="143" text-anchor="middle" fill="rgba(196,80,26,.4)"  font-size="7" font-family="monospace">Q5</text>
+          <text x="201" y="143" text-anchor="middle" fill="rgba(232,160,32,.4)" font-size="7" font-family="monospace">Q6</text>
+          <text x="231" y="143" text-anchor="middle" fill="rgba(232,160,32,.4)" font-size="7" font-family="monospace">Q7</text>
+          <!-- RFM cluster circles right side -->
+          <circle cx="305" cy="55"  r="20" fill="rgba(232,160,32,.15)" stroke="rgba(232,160,32,.5)" stroke-width="1.5"/>
+          <text x="305" y="51"  text-anchor="middle" fill="rgba(232,160,32,.9)" font-size="7" font-family="monospace">High</text>
+          <text x="305" y="62"  text-anchor="middle" fill="rgba(232,160,32,.7)" font-size="7" font-family="monospace">Value</text>
+          <circle cx="355" cy="80"  r="14" fill="rgba(196,80,26,.12)"  stroke="rgba(196,80,26,.4)"  stroke-width="1.5"/>
+          <text x="355" y="84"  text-anchor="middle" fill="rgba(196,80,26,.9)"  font-size="7" font-family="monospace">At Risk</text>
+          <circle cx="298" cy="118" r="11" fill="rgba(180,100,200,.1)" stroke="rgba(180,100,200,.4)" stroke-width="1.5"/>
+          <text x="298" y="122" text-anchor="middle" fill="rgba(180,100,200,.9)" font-size="6" font-family="monospace">Dormant</text>
+          <circle cx="348" cy="122" r="16" fill="rgba(232,160,32,.08)" stroke="rgba(232,160,32,.3)" stroke-width="1"/>
+          <text x="348" y="118" text-anchor="middle" fill="rgba(232,160,32,.6)" font-size="6" font-family="monospace">Loyal</text>
+          <text x="348" y="129" text-anchor="middle" fill="rgba(232,160,32,.4)" font-size="6" font-family="monospace">Cust.</text>
+          <!-- connecting lines between clusters -->
+          <line x1="320" y1="63" x2="342" y2="70" stroke="rgba(232,160,32,.15)" stroke-width="1" stroke-dasharray="3 2"/>
+          <line x1="345" y1="94" x2="336" y2="108" stroke="rgba(196,80,26,.15)" stroke-width="1" stroke-dasharray="3 2"/>
+          <!-- label -->
+          <text x="280" y="20" fill="rgba(232,160,32,.4)" font-size="8" font-family="monospace">K-Means Segments</text>
+        </svg>
+      </div>
+      <p class="project-num" data-en="Project 04" data-cn="项目 04">Project 04</p>
+      <h3 class="project-title" data-en="E-Commerce Analytics Pipeline" data-cn="电商数据分析流水线">E-Commerce Analytics Pipeline</h3>
+      <p class="project-desc"
+         data-en="End-to-end Snowflake pipeline with RFM analysis and K-Means customer segmentation for actionable retail insights."
+         data-cn="基于 Snowflake 的端到端数据流水线，集成 RFM 分析与 K-Means 客户分群，提供可落地的零售洞见。">End-to-end Snowflake pipeline with RFM analysis and K-Means customer segmentation for actionable retail insights.</p>
+      <div class="project-tags">
+        <span class="ptag dat">Snowflake</span><span class="ptag ml">K-Means</span>
+        <span class="ptag dat">PySpark</span><span class="ptag dat">SQL</span>
+      </div>
+      <a href="https://github.com/LiMi686/data-portfolio" class="project-link" target="_blank"
+         data-en="View on GitHub →" data-cn="查看源码 →">View on GitHub →</a>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-visual">
+        <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect width="400" height="160" fill="#090806"/>
+          <!-- grid lines horizontal -->
+          <line x1="0" y1="40"  x2="400" y2="40"  stroke="rgba(232,160,32,.05)" stroke-width="1"/>
+          <line x1="0" y1="80"  x2="400" y2="80"  stroke="rgba(232,160,32,.08)" stroke-width="1"/>
+          <line x1="0" y1="120" x2="400" y2="120" stroke="rgba(232,160,32,.05)" stroke-width="1"/>
+          <!-- grid lines vertical -->
+          <line x1="80"  y1="0" x2="80"  y2="160" stroke="rgba(232,160,32,.04)" stroke-width="1"/>
+          <line x1="160" y1="0" x2="160" y2="160" stroke="rgba(232,160,32,.04)" stroke-width="1"/>
+          <line x1="240" y1="0" x2="240" y2="160" stroke="rgba(232,160,32,.04)" stroke-width="1"/>
+          <line x1="320" y1="0" x2="320" y2="160" stroke="rgba(232,160,32,.04)" stroke-width="1"/>
+          <!-- calm seismic trace before event -->
+          <polyline points="0,80 10,79 20,81 30,80 40,79 50,81 60,80 70,79 80,80" fill="none" stroke="rgba(232,160,32,.5)" stroke-width="1.5"/>
+          <!-- seismic event — big spike -->
+          <polyline points="80,80 88,80 92,30 96,140 100,20 106,125 110,45 116,110 120,60 125,95 130,72 135,88 140,78 148,82 155,80 165,79 175,81 185,80 195,79" fill="none" stroke="rgba(232,160,32,.9)" stroke-width="2"/>
+          <!-- aftershock diminishing -->
+          <polyline points="195,80 205,72 210,88 215,75 220,85 225,78 230,82 240,80 250,79 260,81 270,80 280,79 290,80 300,81 310,80 320,79 330,80 340,81 350,80 360,79 370,80 380,81 390,80 400,80" fill="none" stroke="rgba(196,80,26,.6)" stroke-width="1.5"/>
+          <!-- damage zone highlight -->
+          <rect x="85" y="15" width="115" height="130" fill="rgba(232,160,32,.03)" stroke="rgba(232,160,32,.15)" stroke-width="1" stroke-dasharray="4 3"/>
+          <text x="143" y="12" text-anchor="middle" fill="rgba(232,160,32,.4)" font-size="7" font-family="monospace">EVENT ZONE</text>
+          <!-- magnitude badge -->
+          <rect x="310" y="20" width="75" height="36" rx="3" fill="rgba(196,80,26,.1)" stroke="rgba(196,80,26,.35)" stroke-width="1"/>
+          <text x="348" y="34" text-anchor="middle" fill="rgba(196,80,26,.6)" font-size="7" font-family="monospace">Magnitude</text>
+          <text x="348" y="48" text-anchor="middle" fill="rgba(196,80,26,.95)" font-size="14" font-family="monospace" font-weight="bold">6.8</text>
+          <!-- stat labels -->
+          <text x="10" y="155" fill="rgba(232,160,32,.3)" font-size="7" font-family="monospace">Time Series · Signal Processing · R · Python</text>
+        </svg>
+      </div>
+      <p class="project-num" data-en="Project 05" data-cn="项目 05">Project 05</p>
+      <h3 class="project-title" data-en="Seismic Damage Detection" data-cn="地震损伤检测">Seismic Damage Detection</h3>
+      <p class="project-desc"
+         data-en="Statistical modeling and time series analysis for seismic damage assessment using advanced signal processing."
+         data-cn="结合先进信号处理技术的统计建模与时序分析，用于地震损伤评估与预测。">Statistical modeling and time series analysis for seismic damage assessment using advanced signal processing.</p>
+      <div class="project-tags">
+        <span class="ptag dat">Time Series</span><span class="ptag ml">Stat Modeling</span>
+        <span class="ptag dat">Python</span><span class="ptag dat">R</span>
+      </div>
+      <a href="https://github.com/LiMi686/data-portfolio" class="project-link" target="_blank"
+         data-en="View on GitHub →" data-cn="查看源码 →">View on GitHub →</a>
+    </div>
+
+    <div class="project-card reveal">
+      <div class="project-visual">
+        <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <rect width="400" height="160" fill="#090a08"/>
+          <!-- globe arc lines -->
+          <ellipse cx="200" cy="80" rx="130" ry="70" fill="none" stroke="rgba(120,180,100,.08)" stroke-width="1"/>
+          <ellipse cx="200" cy="80" rx="90"  ry="70" fill="none" stroke="rgba(120,180,100,.06)" stroke-width="1"/>
+          <ellipse cx="200" cy="80" rx="45"  ry="70" fill="none" stroke="rgba(120,180,100,.06)" stroke-width="1"/>
+          <line x1="70" y1="80" x2="330" y2="80" stroke="rgba(120,180,100,.08)" stroke-width="1"/>
+          <line x1="75" y1="50" x2="325" y2="50" stroke="rgba(120,180,100,.06)" stroke-width="1"/>
+          <line x1="75" y1="110" x2="325" y2="110" stroke="rgba(120,180,100,.06)" stroke-width="1"/>
+          <!-- heatmap dots — varying size and color by intensity -->
+          <!-- North America -->
+          <circle cx="110" cy="58" r="10" fill="rgba(196,80,26,.8)"/><circle cx="130" cy="65" r="7"  fill="rgba(196,80,26,.6)"/><circle cx="95"  cy="72" r="5"  fill="rgba(232,160,32,.5)"/>
+          <!-- Europe -->
+          <circle cx="195" cy="52" r="9"  fill="rgba(196,80,26,.75)"/><circle cx="210" cy="58" r="6"  fill="rgba(196,80,26,.55)"/><circle cx="182" cy="60" r="5"  fill="rgba(232,160,32,.45)"/>
+          <!-- Asia -->
+          <circle cx="268" cy="60" r="12" fill="rgba(196,80,26,.9)"/><circle cx="285" cy="70" r="8"  fill="rgba(196,80,26,.65)"/><circle cx="255" cy="68" r="6"  fill="rgba(232,160,32,.55)"/><circle cx="278" cy="50" r="5"  fill="rgba(232,160,32,.4)"/>
+          <!-- South America -->
+          <circle cx="130" cy="98" r="7"  fill="rgba(232,160,32,.55)"/><circle cx="145" cy="108" r="5"  fill="rgba(232,160,32,.4)"/>
+          <!-- Africa -->
+          <circle cx="200" cy="88" r="6"  fill="rgba(232,160,32,.5)"/><circle cx="212" cy="100" r="4"  fill="rgba(232,160,32,.35)"/>
+          <!-- Australia -->
+          <circle cx="295" cy="105" r="5"  fill="rgba(232,160,32,.4)"/>
+          <!-- small scattered dots -->
+          <circle cx="155" cy="55" r="3"  fill="rgba(232,160,32,.3)"/>
+          <circle cx="240" cy="75" r="3"  fill="rgba(232,160,32,.3)"/>
+          <circle cx="170" cy="70" r="2.5" fill="rgba(232,160,32,.25)"/>
+          <circle cx="320" cy="68" r="3"  fill="rgba(232,160,32,.25)"/>
+          <circle cx="88"  cy="88" r="3"  fill="rgba(232,160,32,.2)"/>
+          <!-- legend -->
+          <circle cx="38" cy="130" r="6"  fill="rgba(196,80,26,.8)"/>
+          <text x="48" y="134" fill="rgba(196,80,26,.8)"  font-size="7" font-family="monospace">High</text>
+          <circle cx="75" cy="130" r="4"  fill="rgba(232,160,32,.6)"/>
+          <text x="83" y="134" fill="rgba(232,160,32,.7)"  font-size="7" font-family="monospace">Mid</text>
+          <circle cx="107" cy="130" r="2.5" fill="rgba(232,160,32,.35)"/>
+          <text x="113" y="134" fill="rgba(232,160,32,.5)"  font-size="7" font-family="monospace">Low</text>
+          <text x="260" y="134" fill="rgba(120,180,100,.4)" font-size="7" font-family="monospace">200+ countries · Tableau</text>
+        </svg>
+      </div>
+      <p class="project-num" data-en="Project 06" data-cn="项目 06">Project 06</p>
+      <h3 class="project-title" data-en="Pandemic Global Visualization" data-cn="全球疫情可视化分析">Pandemic Global Visualization</h3>
+      <p class="project-desc"
+         data-en="Interactive COVID-19 data visualization across 200+ countries using geographic heatmaps and Tableau dashboards."
+         data-cn="基于地理热力图与 Tableau 仪表板，对 200+ 国家的疫情数据进行交互式可视化分析。">Interactive COVID-19 data visualization across 200+ countries using geographic heatmaps and Tableau dashboards.</p>
+      <div class="project-tags">
+        <span class="ptag viz">Tableau</span><span class="ptag viz">Geospatial</span>
+        <span class="ptag viz">Data Viz</span><span class="ptag dat">Python</span>
+      </div>
+      <a href="https://github.com/LiMi686/data-portfolio" class="project-link" target="_blank"
+         data-en="View on GitHub →" data-cn="查看源码 →">View on GitHub →</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== MUSIC ===== -->
+<section id="music">
+  <div class="music-inner">
+    <div class="music-text reveal">
+      <p class="section-label" data-en="iv. Music" data-cn="iv. 音乐">iv. Music</p>
+      <h2 class="section-title" data-en="Beyond the Algorithm" data-cn="算法之外">Beyond the Algorithm</h2>
+      <p data-en="When I'm not building models, I'm playing folk guitar under the open sky. There's a deep reason these two worlds feel so similar to me."
+         data-cn="当我不在训练模型时，我在蓝天下弹民谣吉他。这两个世界对我来说有着深层的相似之处。">When I'm not building models, I'm playing folk guitar under the open sky. There's a deep reason these two worlds feel so similar to me.</p>
+      <p data-en="Both AI and music are fundamentally about pattern recognition. A chord progression, a melody, a training loop — all are systems finding beauty within structure."
+         data-cn="AI与音乐的本质都是模式识别。一段和弦进行、一段旋律、一个训练循环——都是在结构中发现美的系统。">Both AI and music are fundamentally about pattern recognition. A chord progression, a melody, a training loop — all are systems finding beauty within structure.</p>
+      <blockquote class="music-quote"
+        data-en='"A neural network and a folk song are the same — both learn to speak by listening, over and over, until the pattern becomes instinct."'
+        data-cn='"神经网络与民谣的本质相同——两者都通过一遍遍地聆听来学习表达，直到规律变成本能。"'>"A neural network and a folk song are the same — both learn to speak by listening, over and over, until the pattern becomes instinct."</blockquote>
+      <div class="music-tags">
+        <span class="music-tag" data-en="♩ Folk Guitar" data-cn="♩ 民谣吉他">♩ Folk Guitar</span>
+        <span class="music-tag" data-en="♪ Fingerpicking" data-cn="♪ 指弹">♪ Fingerpicking</span>
+        <span class="music-tag" data-en="♫ Acoustic" data-cn="♫ 木吉他">♫ Acoustic</span>
+        <span class="music-tag" data-en="♬ AI × Music" data-cn="♬ AI × 音乐">♬ AI × 音乐</span>
+      </div>
+    </div>
+
+    <div class="music-visual reveal">
+      <!-- VINYL -->
+      <div class="vinyl-wrap">
+        <div class="vinyl"></div>
+        <div class="vinyl-center" data-en="Folk<br>Guitar" data-cn="民谣<br>吉他">Folk<br>Guitar</div>
+        <div class="vinyl-needle"></div>
+      </div>
+
+      <!-- MUSIC STAFF WITH NOTES -->
+      <div class="staff-visual">
+        <svg viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+          <line x1="10" y1="20" x2="290" y2="20" stroke="#e8a020" stroke-width=".4" opacity=".3"/>
+          <line x1="10" y1="30" x2="290" y2="30" stroke="#e8a020" stroke-width=".4" opacity=".3"/>
+          <line x1="10" y1="40" x2="290" y2="40" stroke="#e8a020" stroke-width=".4" opacity=".3"/>
+          <line x1="10" y1="50" x2="290" y2="50" stroke="#e8a020" stroke-width=".4" opacity=".3"/>
+          <line x1="10" y1="60" x2="290" y2="60" stroke="#e8a020" stroke-width=".4" opacity=".3"/>
+          <!-- Notes -->
+          <text x="40"  y="28" font-size="18" fill="#e8a020" opacity=".6">♩</text>
+          <text x="90"  y="38" font-size="16" fill="#c4501a" opacity=".5">♪</text>
+          <text x="140" y="48" font-size="20" fill="#e8a020" opacity=".7">♫</text>
+          <text x="195" y="32" font-size="16" fill="#c4501a" opacity=".5">♬</text>
+          <text x="240" y="52" font-size="18" fill="#e8a020" opacity=".6">♩</text>
+        </svg>
+      </div>
+
+      <!-- EQ -->
+      <div class="eq-row" id="eq"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EDUCATION ===== -->
+<section id="education" style="display:none">
+  <div class="reveal">
+    <p class="section-label" data-en="iv.v · Education" data-cn="iv.v · 教育背景">iv.v · Education</p>
+    <h2 class="section-title" data-en="Academic Journey" data-cn="学术经历">Academic Journey</h2>
+  </div>
+  <div class="timeline" id="timeline">
+
+    <!-- LEFT — Bachelor's -->
+    <div class="tl-item left reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <p class="tl-period">2019 — 2023</p>
+        <h3 class="tl-school" data-en="Mapua University" data-cn="马普阿大学">Mapua University</h3>
+        <p class="tl-degree"
+           data-en="Bachelor of Science · Data Science"
+           data-cn="理学学士 · 数据科学">Bachelor of Science · Data Science</p>
+        <div class="tl-bars">
+          <div class="tl-bar-row">
+            <span class="tl-bar-label">Data Analysis</span>
+            <div class="tl-bar-track"><div class="tl-bar-fill" data-w="0.92"></div></div>
+            <span class="tl-bar-val">92%</span>
+          </div>
+          <div class="tl-bar-row">
+            <span class="tl-bar-label">Statistics</span>
+            <div class="tl-bar-track"><div class="tl-bar-fill" data-w="0.88"></div></div>
+            <span class="tl-bar-val">88%</span>
+          </div>
+          <div class="tl-bar-row">
+            <span class="tl-bar-label">Programming</span>
+            <div class="tl-bar-track"><div class="tl-bar-fill" data-w="0.90"></div></div>
+            <span class="tl-bar-val">90%</span>
+          </div>
+        </div>
+        <div class="tl-tags">
+          <span class="tl-tag">Python</span>
+          <span class="tl-tag">SQL</span>
+          <span class="tl-tag">R</span>
+          <span class="tl-tag">Tableau</span>
+          <span class="tl-tag">Philippines</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT — Master's -->
+    <div class="tl-item right reveal">
+      <div class="tl-dot"></div>
+      <div class="tl-card">
+        <p class="tl-period">2024 — 2026</p>
+        <h3 class="tl-school" data-en="University of Arizona" data-cn="亚利桑那大学">University of Arizona</h3>
+        <p class="tl-degree"
+           data-en="Master of Science · Data Science"
+           data-cn="理学硕士 · 数据科学">Master of Science · Data Science</p>
+        <div class="tl-bars">
+          <div class="tl-bar-row">
+            <span class="tl-bar-label">Machine Learning</span>
+            <div class="tl-bar-track"><div class="tl-bar-fill" data-w="0.94"></div></div>
+            <span class="tl-bar-val">94%</span>
+          </div>
+          <div class="tl-bar-row">
+            <span class="tl-bar-label">NLP / LLMs</span>
+            <div class="tl-bar-track"><div class="tl-bar-fill" data-w="0.91"></div></div>
+            <span class="tl-bar-val">91%</span>
+          </div>
+          <div class="tl-bar-row">
+            <span class="tl-bar-label">Deep Learning</span>
+            <div class="tl-bar-track"><div class="tl-bar-fill" data-w="0.89"></div></div>
+            <span class="tl-bar-val">89%</span>
+          </div>
+        </div>
+        <div class="tl-tags">
+          <span class="tl-tag">PyTorch</span>
+          <span class="tl-tag">LLM</span>
+          <span class="tl-tag">RAG</span>
+          <span class="tl-tag">Cloud</span>
+          <span class="tl-tag">Arizona, USA</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section id="contact">
+  <div class="reveal">
+    <p class="section-label" data-en="v. Contact" data-cn="v. 联系">v. Contact</p>
+    <h2 class="section-title" data-en="Let's Connect" data-cn="建立连接">Let's Connect</h2>
+    <p class="contact-intro"
+       data-en="Currently open to full-time opportunities in AI Engineering and LLM Application Development. I'd love to hear from you."
+       data-cn="目前正在寻求AI工程师和大语言模型应用开发方向的全职机会。期待与你的交流。">Currently open to full-time opportunities in AI Engineering and LLM Application Development. I'd love to hear from you.</p>
+    <div class="contact-links">
+      <a href="mailto:lim33746@gmail.com" class="contact-link">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        <span data-en="Email Me" data-cn="发邮件">Email Me</span>
+      </a>
+      <a href="https://www.linkedin.com/in/li-mi-330upup/" class="contact-link" target="_blank">
+        <svg viewBox="0 0 24 24"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
+        <span>LinkedIn</span>
+      </a>
+      <a href="https://github.com/LiMi686" class="contact-link" target="_blank">
+        <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p data-en="© 2025 · Li Mi · 米力 · Somewhere between a model and a melody"
+     data-cn="© 2025 · 米力 · Li Mi · 游走于模型与旋律之间">© 2025 · Li Mi · 米力 · Somewhere between a model and a melody</p>
+</footer>
+
+<script>
+/* ===== FALLING MAPLE LEAVES ===== */
+(function(){
+  const c = document.getElementById('leaf-canvas');
+  const ctx = c.getContext('2d');
+  c.width = innerWidth; c.height = innerHeight;
+  window.addEventListener('resize', ()=>{ c.width=innerWidth; c.height=innerHeight; });
+
+  const COLORS = ['#c44010','#d46018','#e08020','#b83008','#d44820','#e8a030','#a02808','#cc5515'];
+
+  function makeLeaf(){
+    return {
+      x: Math.random()*innerWidth,
+      y: -30 - Math.random()*100,
+      size: 8 + Math.random()*14,
+      color: COLORS[Math.random()*COLORS.length|0],
+      vx: -0.5 + Math.random(),
+      vy: 0.8 + Math.random()*1.4,
+      rot: Math.random()*Math.PI*2,
+      vr: (Math.random()-.5)*.04,
+      sway: Math.random()*Math.PI*2,
+      swaySpeed: .01 + Math.random()*.02,
+      swayAmp: 0.5 + Math.random()*1.2,
+      opacity: .55 + Math.random()*.35,
+    };
+  }
+
+  const leaves = Array.from({length:28}, makeLeaf).map(l=>({ ...l, y: Math.random()*innerHeight }));
+
+  function drawLeaf(ctx, l){
+    ctx.save();
+    ctx.translate(l.x, l.y);
+    ctx.rotate(l.rot);
+    ctx.globalAlpha = l.opacity;
+    ctx.fillStyle = l.color;
+    ctx.beginPath();
+    const s = l.size;
+    // maple-like leaf shape
+    ctx.moveTo(0, -s);
+    ctx.bezierCurveTo(s*.6, -s*.6, s*.8, 0, 0, s*.3);
+    ctx.bezierCurveTo(-s*.8, 0, -s*.6, -s*.6, 0, -s);
+    // side lobes
+    ctx.moveTo(0, -s*.4);
+    ctx.bezierCurveTo(s*.9, -s*.8, s, -s*.2, s*.4, 0);
+    ctx.moveTo(0, -s*.4);
+    ctx.bezierCurveTo(-s*.9, -s*.8, -s, -s*.2, -s*.4, 0);
+    ctx.fill();
+    // stem
+    ctx.beginPath();
+    ctx.moveTo(0, s*.3);
+    ctx.lineTo(0, s*.8);
+    ctx.strokeStyle = l.color;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = l.opacity*.6;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function animate(){
+    ctx.clearRect(0,0,c.width,c.height);
+    leaves.forEach(l => {
+      l.sway += l.swaySpeed;
+      l.x += l.vx + Math.sin(l.sway)*l.swayAmp;
+      l.y += l.vy;
+      l.rot += l.vr;
+      if(l.y > innerHeight+40 || l.x < -40 || l.x > innerWidth+40){
+        Object.assign(l, makeLeaf());
+      }
+      drawLeaf(ctx, l);
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+/* ===== EQUALIZER ===== */
+(function(){
+  const eq = document.getElementById('eq');
+  [30,55,80,65,110,75,50,100,70,40,95,60,120,45,85].forEach((mx,i)=>{
+    const b = document.createElement('div');
+    b.className = 'eq-b';
+    b.style.cssText = `--mn:5px; --mx:${mx}px; --d:${.3+Math.random()*.7}s; --dl:${i*.06}s;`;
+    eq.appendChild(b);
+  });
+})();
+
+/* ===== SCROLL REVEAL ===== */
+const ro = new IntersectionObserver(ee => ee.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('on'); }), {threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+/* Progress bars: set actual width from CSS var */
+document.querySelectorAll('.tl-bar-fill').forEach(b=>{
+  b.style.transformOrigin='left';
+  const w = b.style.getPropertyValue('--w') || b.getAttribute('style').match(/--w:([\d.]+)/)?.[1] || '0.8';
+  b.style.setProperty('--w', w);
+  /* override transition end width */
+  b.style.transition = 'transform 1.1s cubic-bezier(.22,1,.36,1)';
+  const parent = b.closest('.tl-item');
+  const obs = new IntersectionObserver(([e])=>{
+    if(e.isIntersecting){ b.style.transform = `scaleX(${w})`; obs.disconnect(); }
+  },{threshold:.2});
+  obs.observe(parent);
+});
+
+/* ===== VINYL CLICK PAUSE/PLAY ===== */
+const vinyl = document.getElementById('navVinyl');
+if(vinyl){
+  vinyl.addEventListener('click',()=> vinyl.classList.toggle('paused'));
+}
+
+/* ===== ACTIVE NAV ===== */
+window.addEventListener('scroll',()=>{
+  let cur='';
+  document.querySelectorAll('section[id]').forEach(s=>{ if(scrollY>=s.offsetTop-220) cur=s.id; });
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')===`#${cur}`));
+},{passive:true});
+
+/* ===== LANGUAGE ===== */
+let lang='en';
+function setLang(l){
+  lang=l;
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  document.getElementById('btn-zh').classList.toggle('active',l==='zh');
+  document.documentElement.lang=l==='en'?'en':'zh';
+  document.querySelectorAll('[data-en]').forEach(el=>{
+    if(el.id==='typewriter') return;
+    const val = l==='en' ? el.dataset.en : el.dataset.cn;
+    if(val && val.includes('<strong>')) el.innerHTML=val;
+    else if(val) el.textContent=val;
+  });
+  twIdx=0; twChar=0; twDel=false;
+}
+
+/* ===== TYPEWRITER ===== */
+const tw=document.getElementById('typewriter');
+const lines={
+  en:['Finding patterns in data and music.','Building AI that thinks, playing chords that feel.','Where machine learning meets the open road.','Somewhere between a model and a melody.'],
+  zh:['在数据与音乐中寻找规律。','构建会思考的 AI，弹奏有感情的和弦。','机器学习与秋日枫叶的交汇处。','游走于模型与旋律之间。']
+};
+let twIdx=0,twChar=0,twDel=false;
+function typeStep(){
+  const list=lines[lang], cur=list[twIdx%list.length];
+  if(!twDel){ tw.textContent=cur.slice(0,++twChar); if(twChar===cur.length){twDel=true;setTimeout(typeStep,2500);return;} }
+  else { tw.textContent=cur.slice(0,--twChar); if(twChar===0){twDel=false;twIdx++;} }
+  setTimeout(typeStep, twDel?38:78);
+}
+typeStep();
+</script>
+
+<!-- ===== CHATBOT ===== -->
+<style>
+  /* TRIGGER BUTTON */
+  .chat-trigger {
+    position:fixed; bottom:2rem; right:2rem; z-index:500;
+    width:56px; height:56px; border-radius:50%;
+    background:linear-gradient(135deg, #f0aa28, #c86018);
+    border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 20px rgba(240,170,40,.4);
+    transition:transform .3s, box-shadow .3s;
+    font-size:1.4rem;
+  }
+  .chat-trigger:hover { transform:scale(1.1); box-shadow:0 6px 28px rgba(240,170,40,.6); }
+  .chat-trigger .chat-notif {
+    position:absolute; top:-2px; right:-2px;
+    width:12px; height:12px; border-radius:50%;
+    background:#e05020; border:2px solid var(--bg);
+    animation:blink 2s infinite;
+  }
+
+  /* CHAT PANEL */
+  .chat-panel {
+    position:fixed; bottom:6rem; right:2rem; z-index:499;
+    width:340px; max-height:520px;
+    background:linear-gradient(160deg, #1e1408 0%, #160e06 100%);
+    border:1px solid rgba(240,170,40,.18);
+    border-radius:12px;
+    box-shadow:0 20px 60px rgba(0,0,0,.7), 0 0 40px rgba(220,110,20,.12);
+    display:flex; flex-direction:column;
+    transform:translateY(20px) scale(.95); opacity:0;
+    pointer-events:none;
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+    overflow:hidden;
+  }
+  .chat-panel.open {
+    transform:translateY(0) scale(1); opacity:1;
+    pointer-events:all;
+  }
+
+  /* PANEL HEADER */
+  .chat-header {
+    display:flex; align-items:center; gap:.75rem;
+    padding:1rem 1.2rem;
+    background:rgba(240,170,40,.06);
+    border-bottom:1px solid rgba(240,170,40,.1);
+    flex-shrink:0;
+  }
+  .chat-avatar {
+    width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(135deg, #f0aa28, #c86018);
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.1rem; flex-shrink:0;
+    box-shadow:0 0 12px rgba(240,170,40,.3);
+  }
+  .chat-header-info { flex:1; }
+  .chat-header-name {
+    font-family:'Cormorant Garamond',serif; font-size:.95rem;
+    color:var(--cream); font-weight:600; letter-spacing:.5px;
+  }
+  .chat-header-status {
+    font-size:.65rem; color:var(--amber); letter-spacing:1px;
+    display:flex; align-items:center; gap:.3rem;
+  }
+  .chat-header-status::before {
+    content:''; width:5px; height:5px; border-radius:50%;
+    background:var(--amber); animation:blink 2s infinite;
+    display:inline-block;
+  }
+  .chat-close {
+    background:none; border:none; color:var(--dim);
+    cursor:pointer; font-size:1.1rem; padding:.2rem;
+    transition:color .2s;
+  }
+  .chat-close:hover { color:var(--cream); }
+
+  /* MESSAGES */
+  .chat-messages {
+    flex:1; overflow-y:auto; padding:1rem;
+    display:flex; flex-direction:column; gap:.75rem;
+    scroll-behavior:smooth;
+  }
+  .chat-messages::-webkit-scrollbar { width:2px; }
+  .chat-messages::-webkit-scrollbar-thumb { background:rgba(240,170,40,.3); }
+
+  .msg {
+    max-width:85%; padding:.65rem .9rem;
+    font-size:.8rem; line-height:1.7;
+    border-radius:10px; word-break:break-word;
+    animation:msgIn .25s ease-out;
+  }
+  @keyframes msgIn {
+    from { opacity:0; transform:translateY(8px); }
+    to   { opacity:1; transform:none; }
+  }
+  .msg.bot {
+    background:rgba(240,170,40,.08);
+    border:1px solid rgba(240,170,40,.12);
+    color:var(--text); align-self:flex-start;
+    border-bottom-left-radius:3px;
+  }
+  .msg.user {
+    background:linear-gradient(135deg, rgba(240,170,40,.22), rgba(200,90,20,.18));
+    border:1px solid rgba(240,170,40,.2);
+    color:var(--cream); align-self:flex-end;
+    border-bottom-right-radius:3px;
+    font-family:'Cormorant Garamond',serif; font-style:italic;
+  }
+  .msg.bot a { color:var(--amber); text-decoration:underline; }
+
+  /* TYPING INDICATOR */
+  .typing {
+    display:flex; gap:4px; padding:.65rem .9rem;
+    background:rgba(240,170,40,.06);
+    border:1px solid rgba(240,170,40,.1);
+    border-radius:10px; border-bottom-left-radius:3px;
+    align-self:flex-start; align-items:center;
+    animation:msgIn .25s ease-out;
+  }
+  .typing span {
+    width:5px; height:5px; border-radius:50%;
+    background:var(--amber); opacity:.5;
+    animation:dot 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay:.2s; }
+  .typing span:nth-child(3) { animation-delay:.4s; }
+  @keyframes dot {
+    0%,80%,100%{ transform:translateY(0); opacity:.4; }
+    40%{ transform:translateY(-4px); opacity:1; }
+  }
+
+  /* QUICK REPLIES */
+  .chat-quickreplies {
+    padding:.6rem 1rem;
+    display:flex; flex-wrap:wrap; gap:.4rem;
+    border-top:1px solid rgba(240,170,40,.08);
+    flex-shrink:0;
+  }
+  .qr-btn {
+    font-size:.68rem; padding:.3rem .75rem;
+    border:1px solid rgba(240,170,40,.22);
+    background:rgba(240,170,40,.05);
+    color:var(--warm); border-radius:2rem;
+    cursor:pointer; transition:all .2s;
+    font-family:'Nunito',sans-serif;
+    white-space:nowrap;
+  }
+  .qr-btn:hover { background:rgba(240,170,40,.15); color:var(--amber); border-color:var(--amber); }
+
+  /* INPUT */
+  .chat-input-row {
+    display:flex; gap:.5rem; padding:.75rem 1rem;
+    border-top:1px solid rgba(240,170,40,.1);
+    flex-shrink:0;
+  }
+  .chat-input {
+    flex:1; background:rgba(255,255,255,.05);
+    border:1px solid rgba(240,170,40,.15);
+    border-radius:6px; padding:.5rem .75rem;
+    color:var(--text); font-family:'Nunito',sans-serif;
+    font-size:.78rem; outline:none; transition:border .2s;
+  }
+  .chat-input:focus { border-color:rgba(240,170,40,.4); }
+  .chat-input::placeholder { color:var(--dim); }
+  .chat-send {
+    width:34px; height:34px;
+    background:linear-gradient(135deg, #f0aa28, #c86018);
+    border:none; border-radius:6px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.9rem; flex-shrink:0; transition:opacity .2s;
+  }
+  .chat-send:hover { opacity:.85; }
+</style>
+
+<!-- CHAT TRIGGER -->
+<button class="chat-trigger" id="chatTrigger" title="Ask me anything">
+  🤖
+  <span class="chat-notif"></span>
+</button>
+
+<!-- CHAT PANEL -->
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-header">
+    <div class="chat-avatar">🎸</div>
+    <div class="chat-header-info">
+      <div class="chat-header-name">Li Mi's AI Assistant</div>
+      <div class="chat-header-status" data-en="Online · Ask me anything" data-cn="在线 · 随时提问">Online · Ask me anything</div>
+    </div>
+    <button class="chat-close" id="chatClose">✕</button>
+  </div>
+
+  <div class="chat-messages" id="chatMessages"></div>
+
+  <div class="chat-quickreplies" id="quickReplies"></div>
+
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" placeholder="Ask about Li Mi..." maxlength="200">
+    <button class="chat-send" id="chatSendBtn">➤</button>
+  </div>
+</div>
+
+<script>
+/* ===== CHATBOT ENGINE ===== */
+(function(){
+  const KB = {
+    en: {
+      greeting: `Hi there! 👋 I'm Li Mi's assistant. Ask me about his background, work experience, education, skills, or how to get in touch!`,
+      fallback: `Hmm, not sure about that one. Try asking about Li Mi's **experience**, **education**, **skills**, **projects**, or **how to contact him**!`,
+      quickReplies: ['Who is Li Mi?','Work Experience','Education','Skills & Stack','Projects','Open to Work?','Contact Info'],
+      rules: [
+        {
+          k: ['who','about','introduce','yourself','leon','米力','background'],
+          r: `**Li Mi** (米力) is a Data Science graduate student at the University of Arizona (GPA 4.0, Distinguished Graduate Scholar), actively transitioning into **AI Engineering**.\n\nHis foundation is in data analysis and statistical modeling — now channeled into building LLM pipelines, RAG systems, and AI agents. His AI engineering journey was sparked at **Hack Arizona**, where his team won the 🏆 **Most Innovative Use of AI for the Public Good** award (Community Food Bank of Southern Arizona).\n\nLooking for full-time roles as an **AI Engineer** or **LLM Application Developer**.`
+        },
+        {
+          k: ['work','experience','job','intern','internship','career','employer','company','usher','arizona list','cancer','law library','research assistant','researcher'],
+          r: `**Li Mi's Work Experience:**\n\n🔬 **Data Analyst Intern** — Arizona List *(Jan 2026 – Present)*\nAnalyzed 22 years of donor data (53K records) in PostgreSQL; built donor reactivation models; conducted geospatial analysis across 925 ZIP codes using Python + geopandas; delivered a 10-section data report with 17 charts.\n\n📚 **Law Library Assistant** — UA James E. Rogers College of Law *(Sep–Dec 2025)*\nInformation retrieval with Nexis Uni; cataloging via ALMA; Library of Congress classification.\n\n🏥 **Graduate Research Assistant** — UA College of Engineering *(May–Aug 2025)*\nBuilt an AI medical image dataset — 300+ laparoscopic surgery images; designed a contamination injection pipeline using Sora & Gemini for surgical artifact simulation.\n\n🔬 **Student Researcher** — UA Cancer Center *(Sep 2024–Mar 2025)*\nApplied K-means clustering & outlier detection on cancer cell datasets; improved classification efficiency by 10%; collaborated with Dr. Paul Langlais, Quantitative Proteomics Lab.\n\n💻 **Data Science Intern** — Usher Technologies Inc *(Jul–Oct 2023, Philippines)*\nDeveloped an earthquake damage assessment ML model using pre/post-earthquake sensor data; achieved 15% reduction in labor costs.`
+        },
+        {
+          k: ['education','degree','university','school','graduate','mapua','arizona','gpa','scholar','bachelor','master','ms','bs'],
+          r: `**Li Mi's Education:**\n\n🎓 **University of Arizona** — MS, Data Science *(Sep 2024 – May 2026)*\n📍 Tucson, Arizona, USA\n⭐ GPA: **4.0 / 4.0** — **Distinguished Graduate Scholar** (Spring 2026)\nSkills: SQL, R, Python, Machine Learning, Statistical Modeling\n\n🎓 **Mapua University** — BS, Data Science *(Aug 2019 – Dec 2023)*\n📍 Manila, Philippines\nPowered by the **Arizona State University Cintana Program**\nSkills: Python, SQL, R, Tableau, Statistical Analysis`
+        },
+        {
+          k: ['cert','certification','certificate','nvidia','huawei','hcia','alibaba','columbia','llm','openai'],
+          r: `**Li Mi's Certifications:**\n\n📜 **Building Customized LLMs with OpenAI** — Columbia+ *(Apr 2026)*\nSkills: LangChain, LlamaIndex\n\n📜 **Fundamentals of Accelerated Data Science** — NVIDIA *(Oct 2025)*\n\n📜 **Apsara Clouder** — Alibaba Cloud *(Dec 2022)*\n\n📜 **HCIA AI** — Huawei *(Nov 2022)*`
+        },
+        {
+          k: ['skill','tech','stack','language','tool','python','sql','tableau','pandas','postgresql','geopandas','matplotlib','r','power bi','aws','azure'],
+          r: `**Li Mi's Core Skill Stack:**\n\n📊 **Data Analysis** — PostgreSQL, SQL, Python (pandas, numpy), R, statistical modeling\n🗺️ **Visualization** — Tableau, matplotlib, Power BI, geospatial (geopandas, pgeocode, TIGER)\n🤖 **AI / ML** — Scikit-learn, LangChain, LlamaIndex, Gemini API, Computer Vision\n☁️ **Infra & Tools** — AWS, Azure, Snowflake, Jupyter, SQLAlchemy, RStudio`
+        },
+        {
+          k: ['project','built','portfolio','chatbot','seismic','pandemic','ecommerce','nlp','rag','bert','career'],
+          r: `**Featured Projects:**\n\n🏆 **Community Food Bank AI Platform** — Hack Arizona 2026 Winner · Dropout risk prediction system (Node.js, Python, MongoDB)\n2️⃣ **RAG Financial Chatbot** — Document Q&A with vector DB\n3️⃣ **BERT Fine-tuning** — Commonsense validation & text classification\n4️⃣ **E-Commerce Analytics** — Snowflake pipeline + K-Means segmentation\n5️⃣ **Seismic Detection** — Time series & ML-based damage assessment\n6️⃣ **Pandemic Visualization** — 200+ country geospatial dashboard`
+        },
+        {
+          k: ['open','hire','job','role','opportunity','available','position','seeking','looking','full-time','fulltime'],
+          r: `Yes! ✅ Li Mi is **actively seeking full-time roles** in:\n\n- AI Engineer\n- LLM Application Developer\n- ML Engineer\n- Data Scientist (AI-focused)\n\n📍 Based in Tucson, Arizona — open to remote & relocation.\n\nReach him at **lim33746@gmail.com**!`
+        },
+        {
+          k: ['contact','email','linkedin','github','reach','touch','connect','message'],
+          r: `**How to reach Li Mi:**\n\n📧 **Email** — lim33746@gmail.com\n💼 **LinkedIn** — linkedin.com/in/li-mi-330upup\n🐙 **GitHub** — github.com/LiMi686\n\nTypically responds within 24 hours!`
+        },
+        {
+          k: ['location','where','arizona','tucson','usa','remote','relocate','city'],
+          r: `Li Mi is based in **Tucson, Arizona, USA** 🌵. Open to:\n\n- On-site roles in the US\n- Remote positions (any timezone)\n- Relocation for the right opportunity`
+        },
+        {
+          k: ['guitar','music','hobby','fun','interest','lofi','folk','play'],
+          r: `When Li Mi's not digging into data, he's playing **folk guitar** 🎸. He sees a deep parallel between data storytelling and music — both are about structure, pattern, and the moments where everything clicks.\n\n*"A good data viz and a good folk song both do the same thing: they make the invisible, visible."*`
+        },
+        {
+          k: ['salary','pay','compensation','rate'],
+          r: `Best discussed directly! Reach out at **lim33746@gmail.com** and Li Mi will be happy to chat. 😊`
+        },
+        {
+          k: ['strength','good at','best','excel'],
+          r: `**Li Mi's Key Strengths:**\n\n⚡ Translating messy data into clear, decision-ready insights\n⚡ SQL & Python for large-scale data wrangling and analysis\n⚡ Visual storytelling — charts and dashboards that non-technical audiences understand\n⚡ Cross-domain experience: nonprofits, clinical research, engineering, legal`
+        },
+      ]
+    },
+    zh: {
+      greeting: `你好！👋 我是 Li Mi 的助手。欢迎问我关于他的工作经历、学历、技能或联系方式！`,
+      fallback: `嗯，这个问题我不太确定。可以试试问关于他的**工作经历**、**教育背景**、**技能**或**联系方式**！`,
+      quickReplies: ['Li Mi是谁？','工作经历','教育背景','技术栈','项目经历','在找工作吗？','联系方式'],
+      rules: [
+        {
+          k: ['who','about','introduce','yourself','leon','米力','background','是谁','介绍','关于'],
+          r: `**米力**（Li Mi）是亚利桑那大学数据科学在读研究生（GPA 4.0，杰出毕业学者），正在向**AI工程师**方向转型。\n\n他的根基在数据分析与统计建模，现在将这些能力转化为构建LLM流水线、RAG系统和AI Agent。AI工程之路的转折点是参加 **Hack Arizona** 黑客马拉松，团队荣获 🏆 **最具创新性AI公益奖**（由 Community Food Bank of Southern Arizona 颁发）。\n\n正在寻求**AI工程师**或**LLM应用开发**方向的全职岗位。`
+        },
+        {
+          k: ['work','experience','job','intern','internship','career','工作','经历','实习','职位','公司'],
+          r: `**Li Mi 的工作经历：**\n\n🔬 **数据分析实习生** — Arizona List *(2026年1月至今)*\n分析22年捐款数据（53K条记录），使用PostgreSQL写窗口函数与CTE；构建捐款者再激活模型；用Python geopandas对925个ZIP码进行地理空间分析；交付含17张图表的完整数据报告。\n\n📚 **法律图书馆助理** — UA法学院 *(2025年9–12月)*\n使用Nexis Uni检索案例法；用ALMA系统管理馆藏目录。\n\n🏥 **研究生研究助理** — UA工学院 *(2025年5–8月)*\n构建AI医疗图像数据集——生成300+张腹腔镜手术图像；使用Sora和Gemini设计手术伪影注入流程。\n\n🔬 **学生研究员** — UA癌症研究中心 *(2024年9月–2025年3月)*\nK-means聚类与离群点检测分析癌细胞数据集；分类效率提升10%；与Paul Langlais博士合作。\n\n💻 **数据科学实习生** — Usher Technologies Inc *(2023年7–10月，菲律宾)*\n开发地震损伤评估机器学习模型；用传感器数据预测震后损伤；劳动成本降低15%。`
+        },
+        {
+          k: ['education','degree','university','school','graduate','mapua','arizona','gpa','教育','学历','大学','本科','硕士','毕业'],
+          r: `**Li Mi 的教育背景：**\n\n🎓 **亚利桑那大学** — 数据科学硕士 *(2024年9月 – 2026年5月)*\n📍 美国亚利桑那州图森\n⭐ GPA：**4.0 / 4.0** — **2026春季杰出毕业学者**\n\n🎓 **马普阿大学** — 数据科学学士 *(2019年8月 – 2023年12月)*\n📍 菲律宾马尼拉\n与亚利桑那州立大学 Cintana 项目合作`
+        },
+        {
+          k: ['cert','certification','certificate','nvidia','huawei','hcia','alibaba','columbia','llm','openai','认证','证书'],
+          r: `**Li Mi 的认证：**\n\n📜 **用OpenAI构建定制化LLM** — Columbia+ *(2026年4月)*\n技能：LangChain、LlamaIndex\n\n📜 **加速数据科学基础** — NVIDIA *(2025年10月)*\n\n📜 **Apsara Clouder** — 阿里云 *(2022年12月)*\n\n📜 **HCIA AI** — 华为 *(2022年11月)*`
+        },
+        {
+          k: ['skill','tech','stack','language','tool','python','sql','tableau','pandas','技能','技术','会什么','擅长'],
+          r: `**Li Mi 的核心技术栈：**\n\n📊 **数据分析** — PostgreSQL、SQL、Python（pandas、numpy）、R、统计建模\n🗺️ **可视化** — Tableau、matplotlib、Power BI、地理空间（geopandas、pgeocode）\n🤖 **AI / ML** — Scikit-learn、LangChain、LlamaIndex、Gemini API、计算机视觉\n☁️ **工具** — AWS、Azure、Snowflake、Jupyter、SQLAlchemy、RStudio`
+        },
+        {
+          k: ['project','built','portfolio','项目','做过','案例'],
+          r: `**Li Mi 的精选项目：**\n\n1️⃣ **职业策略AI系统** — 基于Gemini API的多层级LLM工作流\n2️⃣ **金融文档RAG问答机器人** — 向量数据库+语义检索\n3️⃣ **BERT微调** — 常识验证与多标签文本分类\n4️⃣ **电商数据分析** — Snowflake流水线 + K-Means客户分群\n5️⃣ **地震损伤检测** — 时序分析与ML建模\n6️⃣ **全球疫情可视化** — 200+国家地理热力图`
+        },
+        {
+          k: ['open','work','hire','job','找工','求职','机会','在找','职位','工作'],
+          r: `是的！✅ Li Mi 目前**正在积极求职**，方向包括：\n\n- AI工程师\n- LLM应用开发工程师\n- ML工程师\n- 数据科学家（AI方向）\n\n📍 在美国亚利桑那州，接受远程及搬迁机会。\n\n欢迎联系：**lim33746@gmail.com**！`
+        },
+        {
+          k: ['contact','email','linkedin','github','联系','邮件','怎么联系','触达'],
+          r: `**联系 Li Mi：**\n\n📧 **邮件** — lim33746@gmail.com\n💼 **领英** — linkedin.com/in/li-mi-330upup\n🐙 **GitHub** — github.com/LiMi686\n\n通常24小时内回复！`
+        },
+        {
+          k: ['guitar','music','hobby','fun','吉他','音乐','爱好','民谣'],
+          r: `Li Mi 不分析数据的时候，就在弹**民谣吉他** 🎸。他觉得数据叙事和音乐本质相通——都是在结构中寻找那个让一切豁然开朗的瞬间。\n\n*"一张好的数据图表和一首好民谣做的是同一件事：让看不见的东西，变得可见。"*`
+        },
+        {
+          k: ['strength','good at','best','excel','优势','强项','亮点'],
+          r: `**Li Mi 的核心优势：**\n\n⚡ 把混乱数据变成清晰的决策洞见\n⚡ SQL & Python 大规模数据清洗与分析\n⚡ 可视化叙事——让非技术受众也能看懂的图表\n⚡ 跨领域经验：非营利、临床研究、工程、法律`
+        },
+      ]
+    }
+  };
+
+  const panel    = document.getElementById('chatPanel');
+  const trigger  = document.getElementById('chatTrigger');
+  const closeBtn = document.getElementById('chatClose');
+  const msgBox   = document.getElementById('chatMessages');
+  const input    = document.getElementById('chatInput');
+  const sendBtn  = document.getElementById('chatSendBtn');
+  const qrBox    = document.getElementById('quickReplies');
+  let opened = false;
+
+  function getLang(){ return (typeof lang !== 'undefined' ? lang : 'en'); }
+
+  function getKB(){ return KB[getLang()] || KB.en; }
+
+  function addMsg(text, who){
+    const d = document.createElement('div');
+    d.className = `msg ${who}`;
+    // simple markdown: **bold** → <strong>
+    d.innerHTML = text
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\n/g,'<br>');
+    msgBox.appendChild(d);
+    msgBox.scrollTop = msgBox.scrollHeight;
+    return d;
+  }
+
+  function showTyping(){
+    const t = document.createElement('div');
+    t.className = 'typing'; t.id = 'typing';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    msgBox.appendChild(t);
+    msgBox.scrollTop = msgBox.scrollHeight;
+  }
+
+  function removeTyping(){
+    const t = document.getElementById('typing');
+    if(t) t.remove();
+  }
+
+  function respond(text){
+    const kb = getKB();
+    const q  = text.toLowerCase();
+    for(const rule of kb.rules){
+      if(rule.k.some(k => q.includes(k))){ return rule.r; }
+    }
+    return kb.fallback;
+  }
+
+  function sendMessage(text){
+    if(!text.trim()) return;
+    addMsg(text, 'user');
+    input.value = '';
+    showTyping();
+    setTimeout(()=>{
+      removeTyping();
+      addMsg(respond(text), 'bot');
+      renderQR();
+    }, 700 + Math.random()*400);
+  }
+
+  function renderQR(){
+    const kb = getKB();
+    qrBox.innerHTML = '';
+    kb.quickReplies.forEach(q=>{
+      const b = document.createElement('button');
+      b.className = 'qr-btn'; b.textContent = q;
+      b.onclick = ()=> sendMessage(q);
+      qrBox.appendChild(b);
+    });
+  }
+
+  function openChat(){
+    if(!opened){
+      opened = true;
+      panel.classList.add('open');
+      // greeting
+      setTimeout(()=>{
+        showTyping();
+        setTimeout(()=>{
+          removeTyping();
+          addMsg(getKB().greeting, 'bot');
+          renderQR();
+        }, 800);
+      }, 100);
+      // hide notif dot
+      trigger.querySelector('.chat-notif').style.display = 'none';
+    } else {
+      panel.classList.add('open');
+    }
+  }
+
+  trigger.addEventListener('click', ()=>{
+    if(panel.classList.contains('open')){ panel.classList.remove('open'); }
+    else { openChat(); }
+  });
+
+  closeBtn.addEventListener('click', ()=> panel.classList.remove('open'));
+
+  sendBtn.addEventListener('click', ()=> sendMessage(input.value));
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter') sendMessage(input.value); });
+
+  // re-render QR on language switch
+  const origSetLang = window.setLang;
+  window.setLang = function(l){
+    origSetLang(l);
+    if(opened) renderQR();
+    document.querySelector('.chat-header-status').textContent =
+      l==='en' ? 'Online · Ask me anything' : '在线 · 随时提问';
+  };
+})();
+</script>
+</body>
+</html>
