@@ -652,21 +652,73 @@
     .reveal:nth-child(5){ transition-delay:.42s; }
     .reveal:nth-child(6){ transition-delay:.52s; }
 
+    /* ===== HAMBURGER MENU ===== */
+    .hamburger {
+      display:none; flex-direction:column; justify-content:center;
+      gap:5px; width:32px; height:32px; cursor:pointer;
+      background:transparent; border:none; padding:4px; z-index:300;
+    }
+    .hamburger span {
+      display:block; width:100%; height:1.5px;
+      background:var(--amber); border-radius:2px;
+      transition:all .3s;
+    }
+    .hamburger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+
+    .mobile-menu {
+      display:none; position:fixed; top:0; left:0; right:0; bottom:0;
+      background:rgba(10,5,0,.97); z-index:250;
+      flex-direction:column; align-items:center; justify-content:center;
+      gap:2.4rem; backdrop-filter:blur(20px);
+    }
+    .mobile-menu.open { display:flex; }
+    .mobile-menu a {
+      font-family:'Cormorant Garamond',serif; font-size:2rem;
+      font-weight:300; letter-spacing:6px; text-transform:uppercase;
+      color:var(--dim); text-decoration:none; transition:color .25s;
+    }
+    .mobile-menu a:hover { color:var(--amber); }
+    .mobile-menu .lang-toggle {
+      margin-top:1rem; border-color:rgba(232,160,32,.3);
+    }
+    .mobile-menu .lang-btn { font-size:.8rem; padding:.4rem 1rem; }
+
     /* ===== RESPONSIVE ===== */
     @media(max-width:900px){
       nav { padding:1rem 1.5rem; }
       .nav-links { display:none; }
+      .hamburger { display:flex; }
+      .nav-vinyl { display:none; }
       .about-grid, .music-inner { grid-template-columns:1fr; gap:2.5rem; }
       .projects-grid { grid-template-columns:1fr; }
       #about, #projects, #contact, #skills, #music { padding:5rem 1.5rem; }
       .hero-illustration { width:75%; opacity:.45; }
       .hero-content { max-width:100%; }
+      .hero-img { width:100%; opacity:.25; }
+      #hero { padding:0 6% 0 6%; align-items:flex-end; padding-bottom:8rem; }
+      .hero-cta { flex-direction:column; gap:.8rem; }
+      .hero-cta .btn { text-align:center; }
     }
   </style>
 </head>
 <body>
 
 <canvas id="leaf-canvas"></canvas>
+
+<!-- ===== MOBILE MENU ===== -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about"    data-en="About"    data-cn="关于"    onclick="closeMobileMenu()">About</a>
+  <a href="#skills"   data-en="Skills"   data-cn="技能"   onclick="closeMobileMenu()">Skills</a>
+  <a href="#projects" data-en="Projects" data-cn="项目" onclick="closeMobileMenu()">Projects</a>
+  <a href="#music"    data-en="Music"    data-cn="音乐"    onclick="closeMobileMenu()">Music</a>
+  <a href="#contact"  data-en="Contact"  data-cn="联系"  onclick="closeMobileMenu()">Contact</a>
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="mbtn-en" onclick="setLang('en')">EN</button>
+    <button class="lang-btn"        id="mbtn-zh" onclick="setLang('zh')">中</button>
+  </div>
+</div>
 
 <!-- ===== NAV ===== -->
 <nav>
@@ -687,6 +739,9 @@
   </ul>
   <!-- Spinning vinyl top right -->
   <div class="nav-vinyl" id="navVinyl" title="♪"></div>
+  <button class="hamburger" id="hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- ===== HERO ===== -->
@@ -1668,10 +1723,25 @@ window.addEventListener('scroll',()=>{
 
 /* ===== LANGUAGE ===== */
 let lang='en';
+function toggleMobileMenu(){
+  const menu=document.getElementById('mobileMenu');
+  const btn=document.getElementById('hamburger');
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+  document.body.style.overflow=menu.classList.contains('open')?'hidden':'';
+}
+function closeMobileMenu(){
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('hamburger').classList.remove('open');
+  document.body.style.overflow='';
+}
+
 function setLang(l){
   lang=l;
   document.getElementById('btn-en').classList.toggle('active',l==='en');
   document.getElementById('btn-zh').classList.toggle('active',l==='zh');
+  document.getElementById('mbtn-en').classList.toggle('active',l==='en');
+  document.getElementById('mbtn-zh').classList.toggle('active',l==='zh');
   document.documentElement.lang=l==='en'?'en':'zh';
   document.querySelectorAll('[data-en]').forEach(el=>{
     if(el.id==='typewriter') return;
