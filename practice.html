@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice · Li Mi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #18100a;
+    --bg2:     #221608;
+    --bg3:     #2e1e0e;
+    --amber:   #f0aa28;
+    --rust:    #d05a22;
+    --gold:    #ddb848;
+    --cream:   #faf0dc;
+    --dim:     #9a7a52;
+    --text:    #f0dfc0;
+    --dark:    #0e0702;
+    --green:   #6fbf73;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;font-weight:300;min-height:100vh;padding-bottom:4rem;}
+  a{color:inherit;}
+  code, .mono, textarea, pre{font-family:'JetBrains Mono', monospace;}
+
+  nav{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;
+    padding:1rem 3rem;background:rgba(10,5,0,0.85);backdrop-filter:blur(18px);
+    border-bottom:1px solid rgba(232,160,32,0.15);}
+  .nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;letter-spacing:4px;color:var(--amber);text-decoration:none;}
+  .nav-back{font-size:.75rem;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-decoration:none;border:1px solid rgba(232,160,32,.25);padding:.5rem 1rem;border-radius:2px;transition:.25s;}
+  .nav-back:hover{color:var(--amber);border-color:var(--amber);}
+
+  .wrap{max-width:1000px;margin:0 auto;padding:2.5rem 1.5rem 0;}
+
+  h1{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:2.4rem;color:var(--cream);letter-spacing:1px;}
+  .sub{color:var(--dim);font-size:.95rem;margin-top:.4rem;}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:2rem 0;}
+  .stat{background:var(--bg2);border:1px solid rgba(232,160,32,.12);border-radius:8px;padding:1rem;text-align:center;}
+  .stat .num{font-size:1.6rem;color:var(--amber);font-family:'Cormorant Garamond',serif;font-weight:600;}
+  .stat .lbl{font-size:.68rem;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-top:.2rem;}
+
+  .today-box{background:linear-gradient(135deg, rgba(240,170,40,.12), rgba(208,90,34,.08));
+    border:1px solid rgba(232,160,32,.3);border-radius:10px;padding:1.2rem 1.5rem;margin-bottom:2rem;}
+  .today-box h2{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--amber);margin-bottom:.5rem;}
+  .today-list{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.6rem;}
+  .today-chip{font-size:.75rem;background:rgba(240,170,40,.15);border:1px solid rgba(232,160,32,.3);
+    padding:.3rem .7rem;border-radius:20px;cursor:pointer;transition:.2s;}
+  .today-chip:hover{background:rgba(240,170,40,.3);}
+  .today-chip.done{opacity:.4;text-decoration:line-through;}
+
+  .filters{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.5rem;}
+  .filter-btn{background:var(--bg2);border:1px solid rgba(232,160,32,.2);color:var(--dim);
+    padding:.4rem 1rem;border-radius:20px;font-size:.78rem;letter-spacing:.5px;cursor:pointer;transition:.2s;}
+  .filter-btn.active{background:var(--amber);color:var(--dark);border-color:var(--amber);}
+
+  .qcard{background:var(--bg2);border:1px solid rgba(232,160,32,.12);border-radius:10px;
+    margin-bottom:.9rem;overflow:hidden;transition:border-color .2s;}
+  .qcard.done{border-color:rgba(111,191,115,.4);}
+  .qhead{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;cursor:pointer;}
+  .qhead:hover{background:rgba(240,170,40,.04);}
+  .qcheck{width:20px;height:20px;border-radius:50%;border:2px solid var(--dim);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:.7rem;transition:.2s;}
+  .qcard.done .qcheck{background:var(--green);border-color:var(--green);color:var(--dark);}
+  .qtitle{flex:1;font-size:.95rem;color:var(--cream);}
+  .qmeta{display:flex;gap:.4rem;flex-shrink:0;}
+  .tag{font-size:.65rem;padding:.2rem .55rem;border-radius:10px;letter-spacing:.5px;text-transform:uppercase;}
+  .tag.python{background:rgba(80,150,220,.18);color:#8fc2ee;}
+  .tag.sql{background:rgba(220,150,60,.18);color:var(--gold);}
+  .tag.Easy{background:rgba(111,191,115,.18);color:var(--green);}
+  .tag.Medium{background:rgba(240,170,40,.18);color:var(--amber);}
+  .tag.Hard{background:rgba(208,60,34,.18);color:#e2765a;}
+  .tag.day{background:rgba(255,255,255,.06);color:var(--dim);}
+  .qbody{display:none;padding:0 1.2rem 1.3rem;border-top:1px solid rgba(232,160,32,.08);}
+  .qcard.open .qbody{display:block;}
+  .qprompt{white-space:pre-wrap;line-height:1.6;font-size:.9rem;color:var(--text);margin:1rem 0;}
+  .qprompt table{border-collapse:collapse;margin:.6rem 0;font-size:.82rem;}
+  .qprompt td,.qprompt th{border:1px solid rgba(232,160,32,.2);padding:.3rem .6rem;}
+  textarea.ans{width:100%;min-height:110px;background:var(--dark);color:var(--cream);
+    border:1px solid rgba(232,160,32,.2);border-radius:6px;padding:.7rem;font-size:.85rem;resize:vertical;}
+  .btnrow{display:flex;gap:.6rem;margin-top:.7rem;flex-wrap:wrap;}
+  .btn-sm{background:transparent;border:1px solid rgba(232,160,32,.35);color:var(--amber);
+    padding:.4rem .9rem;border-radius:6px;font-size:.78rem;cursor:pointer;transition:.2s;}
+  .btn-sm:hover{background:rgba(240,170,40,.12);}
+  .btn-sm.mark{border-color:var(--green);color:var(--green);}
+  .solution{display:none;background:var(--dark);border:1px solid rgba(232,160,32,.15);
+    border-radius:6px;padding:.9rem 1rem;margin-top:.8rem;font-size:.82rem;white-space:pre-wrap;line-height:1.55;}
+  .solution.show{display:block;}
+  .explain{color:var(--dim);font-size:.8rem;margin-top:.6rem;line-height:1.5;}
+
+  @media(max-width:700px){
+    nav{padding:1rem 1.2rem;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .wrap{padding:1.5rem 1rem 0;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">L · M</a>
+  <a href="index.html" class="nav-back">← Back to site</a>
+</nav>
+
+<div class="wrap">
+  <h1>Python &amp; SQL Interview Sprint</h1>
+  <p class="sub" id="countdownLine">Loading...</p>
+
+  <div class="stats">
+    <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Qs</div></div>
+    <div class="stat"><div class="num" id="statDone">0</div><div class="lbl">Completed</div></div>
+    <div class="stat"><div class="num" id="statPace">0</div><div class="lbl">Target / Day</div></div>
+    <div class="stat"><div class="num" id="statDays">0</div><div class="lbl">Days Left</div></div>
+  </div>
+
+  <div class="today-box">
+    <h2>Today's Plan</h2>
+    <div id="todayText" class="sub">—</div>
+    <div class="today-list" id="todayList"></div>
+  </div>
+
+  <div class="filters" id="filterCat"></div>
+  <div class="filters" id="filterPhase"></div>
+
+  <div id="qlist"></div>
+</div>
+
+<script src="practice-data.js"></script>
+<script>
+const START_DATE = new Date('2026-07-08');
+const END_DATE   = new Date('2026-08-08');
+const STORAGE_KEY = 'practiceProgress';
+
+function loadProgress(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}; }catch(e){ return {}; } }
+function saveProgress(p){ localStorage.setItem(STORAGE_KEY, JSON.stringify(p)); }
+let progress = loadProgress();
+
+function todayIndex(){
+  const now = new Date();
+  const clamped = now < START_DATE ? START_DATE : (now > END_DATE ? END_DATE : now);
+  const diff = Math.floor((clamped - START_DATE) / 86400000) + 1;
+  return Math.max(1, diff);
+}
+function daysLeft(){
+  const now = new Date();
+  const diff = Math.ceil((END_DATE - now) / 86400000);
+  return Math.max(0, diff);
+}
+
+let activeCat = 'all', activePhase = 'all';
+
+function render(){
+  const total = QUESTIONS.length;
+  const doneCount = Object.values(progress).filter(Boolean).length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statDone').textContent = doneCount;
+  document.getElementById('statDays').textContent = daysLeft();
+  const remaining = total - doneCount;
+  const dl = Math.max(1, daysLeft());
+  document.getElementById('statPace').textContent = Math.max(0, Math.ceil(remaining / dl));
+
+  document.getElementById('countdownLine').textContent =
+    `Jul 8 → Aug 8, 2026 · Day ${todayIndex()} of 32 · ${daysLeft()} days left to your target job-search deadline`;
+
+  const todayQs = QUESTIONS.filter(q => q.day === todayIndex());
+  document.getElementById('todayText').textContent = todayQs.length
+    ? `Day ${todayIndex()} recommended set (${todayQs.length} questions):`
+    : `No new questions scheduled today — good day to review or redo earlier ones.`;
+  const todayList = document.getElementById('todayList');
+  todayList.innerHTML = '';
+  todayQs.forEach(q=>{
+    const chip = document.createElement('span');
+    chip.className = 'today-chip' + (progress[q.id] ? ' done' : '');
+    chip.textContent = `${q.cat === 'python' ? 'PY' : 'SQL'} · ${q.title}`;
+    chip.onclick = ()=>{ document.getElementById('card-'+q.id).scrollIntoView({behavior:'smooth',block:'center'}); openCard(q.id); };
+    todayList.appendChild(chip);
+  });
+
+  const list = document.getElementById('qlist');
+  list.innerHTML = '';
+  QUESTIONS
+    .filter(q => activeCat==='all' || q.cat===activeCat)
+    .filter(q => activePhase==='all' || q.phase===activePhase)
+    .forEach(q=>{
+      const card = document.createElement('div');
+      card.className = 'qcard' + (progress[q.id] ? ' done' : '');
+      card.id = 'card-'+q.id;
+      card.innerHTML = `
+        <div class="qhead" onclick="toggleCard('${q.id}')">
+          <div class="qcheck">${progress[q.id] ? '✓' : ''}</div>
+          <div class="qtitle">${q.title}</div>
+          <div class="qmeta">
+            <span class="tag day">Day ${q.day}</span>
+            <span class="tag ${q.cat}">${q.cat}</span>
+            <span class="tag ${q.difficulty}">${q.difficulty}</span>
+          </div>
+        </div>
+        <div class="qbody">
+          <div class="qprompt">${q.prompt}</div>
+          <textarea class="ans" placeholder="Write your ${q.cat==='python'?'code':'query'} here..." id="ans-${q.id}">${localStorage.getItem('ans-'+q.id)||''}</textarea>
+          <div class="btnrow">
+            <button class="btn-sm" onclick="event.stopPropagation(); toggleSolution('${q.id}')">Show Solution</button>
+            <button class="btn-sm mark" onclick="event.stopPropagation(); markDone('${q.id}')">${progress[q.id] ? 'Mark Incomplete' : 'Mark Complete'}</button>
+          </div>
+          <div class="solution" id="sol-${q.id}"><strong>Solution:</strong>\n${q.solution}\n\n<span style="color:var(--dim)">${q.explain}</span></div>
+        </div>`;
+      card.querySelector('.ans').addEventListener('input', e=>{
+        localStorage.setItem('ans-'+q.id, e.target.value);
+      });
+      list.appendChild(card);
+    });
+}
+
+function toggleCard(id){
+  document.getElementById('card-'+id).classList.toggle('open');
+}
+function openCard(id){
+  document.getElementById('card-'+id).classList.add('open');
+}
+function toggleSolution(id){
+  document.getElementById('sol-'+id).classList.toggle('show');
+}
+function markDone(id){
+  progress[id] = !progress[id];
+  saveProgress(progress);
+  render();
+  openCard(id);
+}
+
+function buildFilters(){
+  const cats = [['all','All'],['python','Python'],['sql','SQL']];
+  const catEl = document.getElementById('filterCat');
+  cats.forEach(([val,label])=>{
+    const b = document.createElement('button');
+    b.className = 'filter-btn' + (val===activeCat?' active':'');
+    b.textContent = label;
+    b.onclick = ()=>{ activeCat = val; buildFilters(); render(); };
+    catEl.appendChild(b);
+  });
+  const phases = [['all','All Phases'],['basics','Basics (Wk 1-2)'],['interview','Interview Real Qs (Wk 3-5)']];
+  const phaseEl = document.getElementById('filterPhase');
+  phaseEl.innerHTML = '';
+  phases.forEach(([val,label])=>{
+    const b = document.createElement('button');
+    b.className = 'filter-btn' + (val===activePhase?' active':'');
+    b.textContent = label;
+    b.onclick = ()=>{ activePhase = val; buildFilters(); render(); };
+    phaseEl.appendChild(b);
+  });
+}
+
+buildFilters();
+render();
+</script>
+</body>
+</html>
