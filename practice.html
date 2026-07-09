@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-wasm.js"></script>
 <style>
   :root {
     --bg:      #18100a;
@@ -20,6 +22,7 @@
     --text:    #f0dfc0;
     --dark:    #0e0702;
     --green:   #6fbf73;
+    --red:     #e2765a;
   }
   *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
   html{scroll-behavior:smooth;}
@@ -52,6 +55,11 @@
     padding:.3rem .7rem;border-radius:20px;cursor:pointer;transition:.2s;}
   .today-chip:hover{background:rgba(240,170,40,.3);}
   .today-chip.done{opacity:.4;text-decoration:line-through;}
+  .day-reflect{margin-top:1rem;border-top:1px dashed rgba(232,160,32,.25);padding-top:1rem;}
+  .day-reflect textarea{width:100%;min-height:80px;background:var(--dark);color:var(--cream);
+    border:1px solid rgba(232,160,32,.2);border-radius:6px;padding:.6rem;font-size:.85rem;resize:vertical;}
+  .day-reflect .saved{color:var(--green);font-size:.8rem;margin-top:.4rem;}
+  .locked-note{color:var(--dim);font-size:.82rem;font-style:italic;}
 
   .filters{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1.5rem;}
   .filter-btn{background:var(--bg2);border:1px solid rgba(232,160,32,.2);color:var(--dim);
@@ -73,24 +81,33 @@
   .tag.sql{background:rgba(220,150,60,.18);color:var(--gold);}
   .tag.Easy{background:rgba(111,191,115,.18);color:var(--green);}
   .tag.Medium{background:rgba(240,170,40,.18);color:var(--amber);}
-  .tag.Hard{background:rgba(208,60,34,.18);color:#e2765a;}
+  .tag.Hard{background:rgba(208,60,34,.18);color:var(--red);}
   .tag.day{background:rgba(255,255,255,.06);color:var(--dim);}
   .qbody{display:none;padding:0 1.2rem 1.3rem;border-top:1px solid rgba(232,160,32,.08);}
   .qcard.open .qbody{display:block;}
   .qprompt{white-space:pre-wrap;line-height:1.6;font-size:.9rem;color:var(--text);margin:1rem 0;}
-  .qprompt table{border-collapse:collapse;margin:.6rem 0;font-size:.82rem;}
-  .qprompt td,.qprompt th{border:1px solid rgba(232,160,32,.2);padding:.3rem .6rem;}
   textarea.ans{width:100%;min-height:110px;background:var(--dark);color:var(--cream);
     border:1px solid rgba(232,160,32,.2);border-radius:6px;padding:.7rem;font-size:.85rem;resize:vertical;}
-  .btnrow{display:flex;gap:.6rem;margin-top:.7rem;flex-wrap:wrap;}
+  .btnrow{display:flex;gap:.6rem;margin-top:.7rem;flex-wrap:wrap;align-items:center;}
   .btn-sm{background:transparent;border:1px solid rgba(232,160,32,.35);color:var(--amber);
     padding:.4rem .9rem;border-radius:6px;font-size:.78rem;cursor:pointer;transition:.2s;}
   .btn-sm:hover{background:rgba(240,170,40,.12);}
   .btn-sm.mark{border-color:var(--green);color:var(--green);}
+  .btn-sm:disabled{opacity:.4;cursor:not-allowed;}
+  .run-status{font-size:.78rem;color:var(--dim);}
+  .result-box{margin-top:.8rem;border-radius:6px;padding:.8rem 1rem;font-size:.82rem;white-space:pre-wrap;}
+  .result-box.pass{background:rgba(111,191,115,.1);border:1px solid rgba(111,191,115,.4);color:var(--green);}
+  .result-box.fail{background:rgba(208,60,34,.1);border:1px solid rgba(208,60,34,.4);color:var(--red);}
+  .result-box.info{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:var(--dim);}
+  .result-detail{color:var(--text);margin-top:.5rem;font-size:.78rem;}
   .solution{display:none;background:var(--dark);border:1px solid rgba(232,160,32,.15);
     border-radius:6px;padding:.9rem 1rem;margin-top:.8rem;font-size:.82rem;white-space:pre-wrap;line-height:1.55;}
   .solution.show{display:block;}
   .explain{color:var(--dim);font-size:.8rem;margin-top:.6rem;line-height:1.5;}
+  .reflect-block{margin-top:1rem;border-top:1px dashed rgba(232,160,32,.2);padding-top:.8rem;}
+  .reflect-block label{display:block;font-size:.78rem;color:var(--dim);margin-bottom:.4rem;}
+  textarea.reflect{width:100%;min-height:70px;background:var(--dark);color:var(--cream);
+    border:1px solid rgba(232,160,32,.2);border-radius:6px;padding:.6rem;font-size:.83rem;resize:vertical;}
 
   @media(max-width:700px){
     nav{padding:1rem 1.2rem;}
@@ -121,6 +138,7 @@
     <h2>Today's Plan</h2>
     <div id="todayText" class="sub">—</div>
     <div class="today-list" id="todayList"></div>
+    <div class="day-reflect" id="dayReflectBox"></div>
   </div>
 
   <div class="filters" id="filterCat"></div>
@@ -151,6 +169,91 @@ function daysLeft(){
   return Math.max(0, diff);
 }
 
+// ---------- Pyodide (Python execution) ----------
+let pyodideReadyPromise = null;
+async function getPyodide(){
+  if (!pyodideReadyPromise){
+    pyodideReadyPromise = (async () => {
+      const pyodide = await loadPyodide();
+      await pyodide.loadPackage(['pandas', 'numpy']);
+      pyodide.runPython(`
+import json
+
+def run_check(setup_code, user_code, solution_code, test_expr):
+    def run(code):
+        ns = {}
+        try:
+            if setup_code:
+                exec(setup_code, ns)
+            exec(code, ns)
+            val = eval(test_expr, ns)
+        except Exception as e:
+            return {"error": str(e)}
+        try:
+            return {"value": json.loads(json.dumps(val, default=str))}
+        except Exception:
+            return {"value": str(val)}
+    return json.dumps({"actual": run(user_code), "expected": run(solution_code)})
+`);
+      return pyodide;
+    })();
+  }
+  return pyodideReadyPromise;
+}
+
+async function runPythonCheck(q, userCode){
+  const pyodide = await getPyodide();
+  const runCheck = pyodide.globals.get('run_check');
+  const resultJson = runCheck(q.setup || '', userCode, q.solution, q.test);
+  return JSON.parse(resultJson);
+}
+
+// ---------- sql.js (SQL execution) ----------
+let sqlReadyPromise = null;
+async function getSQL(){
+  if (!sqlReadyPromise){
+    sqlReadyPromise = initSqlJs({ locateFile: f => `https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/${f}` });
+  }
+  return sqlReadyPromise;
+}
+
+async function runSqlCheck(q, userQuery){
+  const SQL = await getSQL();
+  function runOn(query){
+    const db = new SQL.Database();
+    try {
+      q.schema.forEach(stmt => db.run(stmt.trim().endsWith(';') ? stmt : stmt + ';'));
+      db.run(query.trim().endsWith(';') ? query : query + ';');
+      const checkQuery = q.verifyQuery || query;
+      const res = db.exec(checkQuery.trim().endsWith(';') ? checkQuery : checkQuery + ';');
+      db.close();
+      if (!res.length) return { columns: [], values: [] };
+      return { columns: res[0].columns, values: res[0].values };
+    } catch(e){
+      db.close();
+      throw e;
+    }
+  }
+  let actual = null, actualError = null;
+  try { actual = runOn(userQuery); } catch(e){ actualError = e.message; }
+  let expected = null, expectedError = null;
+  try { expected = runOn(q.solution); } catch(e){ expectedError = e.message; }
+  return { actual, actualError, expected, expectedError };
+}
+
+function sortRows(values){
+  return values.map(r => JSON.stringify(r)).sort();
+}
+
+// ---------- Reflection storage ----------
+function loadReflections(){ try{ return JSON.parse(localStorage.getItem('practiceReflections'))||{}; }catch(e){ return {}; } }
+function saveReflections(r){ localStorage.setItem('practiceReflections', JSON.stringify(r)); }
+let reflections = loadReflections();
+
+function loadDayReflections(){ try{ return JSON.parse(localStorage.getItem('practiceDayReflections'))||{}; }catch(e){ return {}; } }
+function saveDayReflections(r){ localStorage.setItem('practiceDayReflections', JSON.stringify(r)); }
+let dayReflections = loadDayReflections();
+
 let activeCat = 'all', activePhase = 'all';
 
 function render(){
@@ -166,9 +269,11 @@ function render(){
   document.getElementById('countdownLine').textContent =
     `Jul 8 → Aug 8, 2026 · Day ${todayIndex()} of 32 · ${daysLeft()} days left to your target job-search deadline`;
 
-  const todayQs = QUESTIONS.filter(q => q.day === todayIndex());
+  const today = todayIndex();
+  const todayQs = QUESTIONS.filter(q => q.day === today);
+  const todayAllDone = todayQs.length > 0 && todayQs.every(q => progress[q.id]);
   document.getElementById('todayText').textContent = todayQs.length
-    ? `Day ${todayIndex()} recommended set (${todayQs.length} questions):`
+    ? `Day ${today} recommended set (${todayQs.length} questions):`
     : `No new questions scheduled today — good day to review or redo earlier ones.`;
   const todayList = document.getElementById('todayList');
   todayList.innerHTML = '';
@@ -179,6 +284,7 @@ function render(){
     chip.onclick = ()=>{ document.getElementById('card-'+q.id).scrollIntoView({behavior:'smooth',block:'center'}); openCard(q.id); };
     todayList.appendChild(chip);
   });
+  renderDayReflect(today, todayAllDone, todayQs.length > 0);
 
   const list = document.getElementById('qlist');
   list.innerHTML = '';
@@ -189,6 +295,8 @@ function render(){
       const card = document.createElement('div');
       card.className = 'qcard' + (progress[q.id] ? ' done' : '');
       card.id = 'card-'+q.id;
+      const savedAnswer = localStorage.getItem('ans-'+q.id) || '';
+      const savedReflect = reflections[q.id] || '';
       card.innerHTML = `
         <div class="qhead" onclick="toggleCard('${q.id}')">
           <div class="qcheck">${progress[q.id] ? '✓' : ''}</div>
@@ -201,18 +309,70 @@ function render(){
         </div>
         <div class="qbody">
           <div class="qprompt">${q.prompt}</div>
-          <textarea class="ans" placeholder="Write your ${q.cat==='python'?'code':'query'} here..." id="ans-${q.id}">${localStorage.getItem('ans-'+q.id)||''}</textarea>
+          <textarea class="ans" placeholder="Write your ${q.cat==='python'?'code':'query'} here..." id="ans-${q.id}">${savedAnswer}</textarea>
           <div class="btnrow">
+            <button class="btn-sm" onclick="event.stopPropagation(); runCheck('${q.id}')">▶ Run &amp; Check</button>
             <button class="btn-sm" onclick="event.stopPropagation(); toggleSolution('${q.id}')">Show Solution</button>
-            <button class="btn-sm mark" onclick="event.stopPropagation(); markDone('${q.id}')">${progress[q.id] ? 'Mark Incomplete' : 'Mark Complete'}</button>
+            <span class="run-status" id="status-${q.id}"></span>
           </div>
-          <div class="solution" id="sol-${q.id}"><strong>Solution:</strong>\n${q.solution}\n\n<span style="color:var(--dim)">${q.explain}</span></div>
+          <div class="result-box" id="result-${q.id}" style="display:none;"></div>
+          <div class="solution" id="sol-${q.id}"><strong>Reference solution:</strong>\n${q.solution}\n\n<span style="color:var(--dim)">${q.explain}</span></div>
+          <div class="reflect-block">
+            <label>复盘(写完/跑完这道题之后,标记完成前必须先填):这道题的思路是什么?卡在哪里了?学到了什么套路?</label>
+            <textarea class="reflect" id="reflect-${q.id}" placeholder="例如:一开始想用暴力双循环,后来想到用哈希表存差值来优化到O(n)...">${savedReflect}</textarea>
+            <div class="btnrow">
+              <button class="btn-sm mark" onclick="event.stopPropagation(); markDone('${q.id}')">${progress[q.id] ? 'Mark Incomplete' : 'Mark Complete'}</button>
+            </div>
+          </div>
         </div>`;
       card.querySelector('.ans').addEventListener('input', e=>{
         localStorage.setItem('ans-'+q.id, e.target.value);
       });
+      card.querySelector('.reflect').addEventListener('input', e=>{
+        reflections[q.id] = e.target.value;
+        saveReflections(reflections);
+      });
       list.appendChild(card);
     });
+}
+
+function renderDayReflect(day, allDone, hasQuestions){
+  const box = document.getElementById('dayReflectBox');
+  if (!hasQuestions){ box.innerHTML = ''; return; }
+  if (!allDone){
+    box.innerHTML = `<p class="locked-note">今日复盘会在你完成当天全部题目后解锁 —— 先把上面的题目做完并标记完成。</p>`;
+    return;
+  }
+  const saved = dayReflections[day];
+  if (saved && saved.locked){
+    box.innerHTML = `
+      <div class="saved">✓ Day ${day} 复盘已保存</div>
+      <div class="qprompt" style="margin-top:.4rem;">${saved.text}</div>
+      <div class="btnrow"><button class="btn-sm" onclick="editDayReflect(${day})">编辑</button></div>`;
+    return;
+  }
+  box.innerHTML = `
+    <label style="display:block;font-size:.8rem;color:var(--dim);margin-bottom:.4rem;">
+      今天的题目全部完成了!写一段今日复盘:今天练的这组题目有什么共同的套路/规律?哪类题目还比较慢或不熟练?明天要重点巩固什么?
+    </label>
+    <textarea id="dayReflectInput">${saved ? saved.text : ''}</textarea>
+    <div class="btnrow"><button class="btn-sm mark" onclick="saveDayReflect(${day})">保存今日复盘</button></div>`;
+}
+
+function saveDayReflect(day){
+  const text = document.getElementById('dayReflectInput').value.trim();
+  if (!text){
+    alert('今日复盘不能为空,写几句再保存吧。');
+    return;
+  }
+  dayReflections[day] = { text, locked: true };
+  saveDayReflections(dayReflections);
+  render();
+}
+function editDayReflect(day){
+  dayReflections[day] = { text: dayReflections[day].text, locked: false };
+  saveDayReflections(dayReflections);
+  render();
 }
 
 function toggleCard(id){
@@ -224,8 +384,82 @@ function openCard(id){
 function toggleSolution(id){
   document.getElementById('sol-'+id).classList.toggle('show');
 }
+
+async function runCheck(id){
+  const q = QUESTIONS.find(x => x.id === id);
+  const userCode = document.getElementById('ans-'+id).value;
+  const statusEl = document.getElementById('status-'+id);
+  const resultEl = document.getElementById('result-'+id);
+  resultEl.style.display = 'block';
+  resultEl.className = 'result-box info';
+  resultEl.textContent = '';
+
+  if (!userCode.trim()){
+    resultEl.className = 'result-box fail';
+    resultEl.textContent = '还没写代码呢。';
+    return;
+  }
+
+  statusEl.textContent = q.cat === 'python'
+    ? '正在加载 Python 运行环境(首次运行约需10-20秒)...'
+    : '正在加载 SQL 引擎...';
+
+  try {
+    if (q.cat === 'python'){
+      const result = await runPythonCheck(q, userCode);
+      statusEl.textContent = '';
+      if (result.actual.error){
+        resultEl.className = 'result-box fail';
+        resultEl.textContent = `✗ 代码运行出错:\n${result.actual.error}`;
+        return;
+      }
+      const actualStr = JSON.stringify(result.actual.value);
+      const expectedStr = JSON.stringify(result.expected.value);
+      if (actualStr === expectedStr){
+        resultEl.className = 'result-box pass';
+        resultEl.textContent = `✓ Pass — 输出结果:\n${actualStr}`;
+      } else {
+        resultEl.className = 'result-box fail';
+        resultEl.textContent = `✗ Fail\n你的输出: ${actualStr}\n期望输出: ${expectedStr}`;
+      }
+    } else {
+      const result = await runSqlCheck(q, userCode);
+      statusEl.textContent = '';
+      if (result.actualError){
+        resultEl.className = 'result-box fail';
+        resultEl.textContent = `✗ SQL 执行出错:\n${result.actualError}`;
+        return;
+      }
+      const actualSorted = sortRows(result.actual.values);
+      const expectedSorted = sortRows(result.expected ? result.expected.values : []);
+      const colsMatch = result.actual.values[0] === undefined || result.expected.values[0] === undefined
+        || result.actual.values[0].length === result.expected.values[0].length;
+      if (JSON.stringify(actualSorted) === JSON.stringify(expectedSorted) && colsMatch){
+        resultEl.className = 'result-box pass';
+        resultEl.textContent = `✓ Pass — ${result.actual.values.length} 行,列: ${result.actual.columns.join(', ')}`;
+      } else {
+        resultEl.className = 'result-box fail';
+        resultEl.textContent = `✗ Fail\n你的结果 (${result.actual.values.length} 行, 列: ${result.actual.columns.join(', ')}):\n${JSON.stringify(result.actual.values.slice(0,5))}\n\n期望结果 (${result.expected.values.length} 行, 列: ${result.expected.columns.join(', ')}):\n${JSON.stringify(result.expected.values.slice(0,5))}\n\n(比对时忽略了行顺序;如果只是列名/别名不同但数值一致,请自行判断是否算对)`;
+      }
+    }
+  } catch(e){
+    statusEl.textContent = '';
+    resultEl.className = 'result-box fail';
+    resultEl.textContent = `✗ 运行环境出错: ${e.message}`;
+  }
+}
+
 function markDone(id){
-  progress[id] = !progress[id];
+  const willBeDone = !progress[id];
+  if (willBeDone){
+    const reflectEl = document.getElementById('reflect-'+id);
+    if (!reflectEl.value.trim()){
+      alert('标记完成前请先写这道题的思路复盘(卡在哪、学到什么套路)。');
+      reflectEl.focus();
+      return;
+    }
+  }
+  progress[id] = willBeDone;
   saveProgress(progress);
   render();
   openCard(id);
@@ -234,6 +468,7 @@ function markDone(id){
 function buildFilters(){
   const cats = [['all','All'],['python','Python'],['sql','SQL']];
   const catEl = document.getElementById('filterCat');
+  catEl.innerHTML = '';
   cats.forEach(([val,label])=>{
     const b = document.createElement('button');
     b.className = 'filter-btn' + (val===activeCat?' active':'');
